@@ -50,6 +50,7 @@ signals:
 protected:
     //for get list
     virtual QVariantList getVariantList(QByteArray bytes);
+	//virtual bool doInsertItems(QVariantList values);
 
 private:
     //for get details for one element

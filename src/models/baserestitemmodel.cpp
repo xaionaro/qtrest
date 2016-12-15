@@ -111,35 +111,12 @@ void BaseRestItemModel::fetchMoreFinished()
 
     QVariantList values = getVariantList(reply->readAll());
 
-    //prepare vars
-    int insertFrom = rowCount();
-    int insertCount = rowCount()+values.count()-1;
-
-    //check if we need to full reload
-    if (this->loadingStatus() == LoadingStatus::FullReloadProcessing) {
-        reset();
-        insertFrom = rowCount();
-        insertCount = values.count()-1;
-    }
-
-    //check for assertion or empty data
-    if (insertCount < insertFrom) { insertCount = insertFrom; }
-
-    if (insertCount == 0) {
-        setLoadingStatus(LoadingStatus::Error);
-        emit countChanged();
-        qDebug() << "Nothing to insert! Please check your parser!" << count() << loadingStatus();
-        return;
-    }
-
-    //append rows to model
-    beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount);
-
-    QListIterator<QVariant> i(values);
-    while (i.hasNext()) {
-        RestItem item = createItem(i.next().toMap());
-        append(item);
-    }
+	if ( !this->doInsertItems(values) ) {
+		setLoadingStatus(LoadingStatus::Error);
+		emit countChanged();
+		qDebug() << "Nothing to insert! Please check your parser!" << count() << loadingStatus();
+		return;
+	}
 
     //get all role names
     generateRoleNames();
@@ -388,6 +365,10 @@ void BaseRestItemModel::generateRoleNames()
     if (m_roleNamesIndex > 0) {
         return;
     }
+	if (rowCount() == 0) {
+		qErrnoWarning("BaseRestItemModel::generateRoleNames(): rowCount() == 0");
+		return;
+	}
 
     RestItem item = m_items[0];
 

@@ -1,4 +1,4 @@
-#include "abstractjsonrestlistmodel.h"
+#include "abstractjsonresttreemodel.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QNetworkReply>
@@ -9,7 +9,7 @@ AbstractJsonRestTreeModel::AbstractJsonRestTreeModel(QObject *parent) : BaseRest
     setAccept("application/json");
 }
 
-QVariantTree AbstractJsonRestTreeModel::getVariantTree(QByteArray bytes)
+QVariantList AbstractJsonRestTreeModel::getVariantTree(QByteArray bytes)
 {
     QString str = QString::fromUtf8(bytes.data(), bytes.size());
 
@@ -21,7 +21,7 @@ QVariantTree AbstractJsonRestTreeModel::getVariantTree(QByteArray bytes)
         qDebug() << parseError.errorString();
     }
 
-    return jsonArray.toVariantTree();
+    return jsonArray.toVariantList();
 }
 
 QVariantMap AbstractJsonRestTreeModel::getVariantMap(QByteArray bytes)

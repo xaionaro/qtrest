@@ -1,180 +1,95 @@
+/****************************************************************************
+**
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of the examples of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:BSD$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** BSD License Usage
+** Alternatively, you may use this file under the terms of the BSD license
+** as follows:
+**
+** "Redistribution and use in source and binary forms, with or without
+** modification, are permitted provided that the following conditions are
+** met:
+**   * Redistributions of source code must retain the above copyright
+**     notice, this list of conditions and the following disclaimer.
+**   * Redistributions in binary form must reproduce the above copyright
+**     notice, this list of conditions and the following disclaimer in
+**     the documentation and/or other materials provided with the
+**     distribution.
+**   * Neither the name of The Qt Company Ltd nor the names of its
+**     contributors may be used to endorse or promote products derived
+**     from this software without specific prior written permission.
+**
+**
+** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/* Dmitry Yu Okunev <dyokunev@ut.mephi.ru>:
+ *
+ * Originally I copied this file:
+ *   Qt/Examples/Qt-5.7/widgets/itemviews/simpletreemodel/treemodel.h
+ *
+ * and modified it in 2016-12-15
+ */
+
 #ifndef BASERESTTREEMODEL_H
 #define BASERESTTREEMODEL_H
 
-#include <QAbstractItemModel>
-#include "restitem.h"
-#include "pagination.h"
-#include "detailsmodel.h"
-#include "apibase.h"
+#include <QObject>
+#include <QModelIndex>
+#include "baserestitemmodel.h"
+#include "treeitem.h"
 
-class QNetworkReply;
-class DetailsModel;
-
-class BaseRestTreeModel : public QAbstractItemModel
+class BaseRestTreeModel : public BaseRestItemModel
 {
-    Q_OBJECT
-    friend DetailsModel;
+
+	Q_OBJECT
+
 public:
-    BaseRestTreeModel(QObject *parent = 0);
+	explicit BaseRestTreeModel(QObject *parent = 0);
+	~BaseRestTreeModel();
 
-    Q_PROPERTY(APIBase *api READ apiInstance WRITE setApiInstance NOTIFY apiInstanceChanged)
-
-    //--------------------
-    //Standard HATEOAS REST API params (https://en.wikipedia.org/wiki/HATEOAS, for example: https://github.com/yiisoft/yii2/blob/master/docs/guide-ru/rest-quick-start.md)
-    //Specify sorting fields
-    Q_PROPERTY(QStringList sort READ sort WRITE setSort NOTIFY sortChanged)
-
-    //Specify pagination
-    Q_PROPERTY(Pagination *pagination READ pagination)
-    //Specify filters parametres
-    Q_PROPERTY(QVariantMap filters READ filters WRITE setFilters NOTIFY filtersChanged)
-    //Specify fields parameter
-    Q_PROPERTY(QStringList fields READ fields WRITE setFields NOTIFY fieldsChanged)
-    //Specify Accept header for application/json or application/xml
-    Q_PROPERTY(QByteArray accept READ accept WRITE setAccept NOTIFY acceptChanged)
-
-    //identify column name, role, last fetched detail and detailModel
-    Q_PROPERTY(QString idField READ idField WRITE setIdField NOTIFY idFieldChanged)
-    Q_PROPERTY(int idFieldRole READ idFieldRole)
-    Q_PROPERTY(QString fetchDetailLastId READ fetchDetailLastId)
-    Q_PROPERTY(DetailsModel *detailsModel READ detailsModel)
-
-    //load status and result code
-    Q_PROPERTY(LoadingStatus loadingStatus READ loadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
-    Q_PROPERTY(QString loadingErrorString READ loadingErrorString WRITE setLoadingErrorString NOTIFY loadingErrorStringChanged)
-    Q_PROPERTY(QNetworkReply::NetworkError loadingErrorCode READ loadingErrorCode WRITE setLoadingErrorCode NOTIFY loadingErrorCodeChanged)
-    Q_PROPERTY(int count READ count NOTIFY countChanged)
-
-    //current status of model
-    enum LoadingStatus {
-        Idle,
-        IdleDetails,
-        RequestToReload,
-        FullReloadProcessing,
-        LoadMoreProcessing,
-        LoadDetailsProcessing,
-        Error
-    };
-
-    Q_ENUMS(LoadingStatus)
-
-    static void declareQML();
-
-    //Properties GET methods
-    QStringTree sort() const;
-    LoadingStatus loadingStatus() const;
-    QVariantMap filters() const;
-    QString loadingErrorString() const;
-    QNetworkReply::NetworkError loadingErrorCode() const;
-    QStringList fields() const;
-    QString idField() const;
-    int idFieldRole() const;
-    QString fetchDetailLastId() const;
-    DetailsModel *detailsModel();
-    Pagination *pagination();
-    QByteArray accept();
-    int count() const;
-
-    //Overloaded system methdos
-    QVariant data(const QModelIndex &index, int role) const;
-
-signals:
-    //Properties signals
-    void countChanged();
-    void sortChanged(QStringTree sort);
-    void loadingStatusChanged(LoadingStatus loadingStatus);
-    void filtersChanged(QVariantMap filters);
-    void loadingErrorStringChanged(QString loadingErrorString);
-    void loadingErrorCodeChanged(QNetworkReply::NetworkError loadingErrorCode);
-    void fieldsChanged(QStringTree fields);
-    void idFieldChanged(QString idField);
-    void acceptChanged(QByteArray accept);
-    void apiInstanceChanged(APIBase *apiInstance);
-
-public slots:
-    void reload();
-    void fetchDetail(QString id);
-    void replyError(QNetworkReply *reply, QNetworkReply::NetworkError error, QString errorString);
-
-    void requestToReload();
-    void forceIdle();
-
-    //Overloaded system methdos
-    bool canFetchMore(const QModelIndex &parent) const;
-    void fetchMore(const QModelIndex &parent);
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-
-    //Properties public SET methods
-    void setSort(QStringTree sort);
-    void setFilters(QVariantMap filters);
-    void setFields(QStringTree fields);
-    void setIdField(QString idField);
-
-    void setApiInstance(APIBase *apiInstance);
+	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+	QVariant headerData(int section, Qt::Orientation orientation,
+			int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+	QModelIndex index(int row, int column,
+			  const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
 protected:
-    //reimplement this for call specific API method GET list
-    virtual QNetworkReply *fetchMoreImpl(const QModelIndex &parent) = 0;
-    //reimplement this for call specific API method GET details of record by ID
-    virtual QNetworkReply *fetchDetailImpl(QString id) = 0;
-    //reimplenet this for prepropcessing each item before add it to model
-    virtual QVariantMap preProcessItem(QVariantMap item) = 0;
-    //for parse list, reimplemented in JSON and XML models
-    virtual QVariantTree getVariantTree(QByteArray bytes) = 0;
-    //for parse details for one element, reimplemented in JSON and XML models
-    virtual QVariantMap getVariantMap(QByteArray bytes) = 0;
-    //API instance for models for one external API service
-
-    //inserts items returned by getVariantTree(); returns true if no errors
-    virtual bool doInsertItems(const QVariantTree &values);
-
-    APIBase *apiInstance();
-
-    //Update specific headers on updating
-    void updateHeadersData(QNetworkReply *reply);
-
-    //Reset model data
-    void reset();
-
-    //Auto generate role names by REST keys
-    void generateRoleNames();
-    void generateDetailsRoleNames(QVariantMap item);
-
-    //Items management
-    RestItem createItem(QVariantMap value);
-    void updateItem(QVariantMap value);
-    RestItem findItemById(QString id);
-    void append(RestItem item);
-
-    QHash<int, QByteArray> roleNames() const;
-    QHash<int, QByteArray> detailsRoleNames() const;
-
-protected slots:
-    //Properties protected SET methods
-    void fetchMoreFinished();
-    void fetchDetailFinished();
-    void setLoadingStatus(LoadingStatus loadingStatus);
-    void setAccept(QString accept);
-    void setLoadingErrorString(QString loadingErrorString);
-    void setLoadingErrorCode(QNetworkReply::NetworkError loadingErrorCode);
+	virtual bool doInsertItems(QVariantList values);
 
 private:
-    //Properties store vars
-    QHash<int, QByteArray> m_roleNames;
-    int m_roleNamesIndex;
-    bool m_detailRoleNamesGenerated;
-    QTree<RestItem> m_items;
-    QStringTree m_fields;
-    QString m_idField;
-    QStringTree m_sort;
-    LoadingStatus m_loadingStatus;
-    QVariantMap m_filters;
-    QString m_loadingErrorString;
-    QNetworkReply::NetworkError m_loadingErrorCode;
-    QString m_fetchDetailLastId;
-    DetailsModel m_detailsModel;
-    Pagination m_pagination;
-    APIBase *m_apiInstance;
+	void setupModelData(const QStringList &lines, TreeItem *parent);
+
+	TreeItem *rootItem;
 };
 
-#endif // BASERESTLISTMODEL_H
+#endif // BASERESTTREEMODEL_H

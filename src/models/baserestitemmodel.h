@@ -77,7 +77,7 @@ public:
     int count() const;
 
     //Overloaded system methdos
-    QVariant data(const QModelIndex &index, int role) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
 
 signals:
     //Properties signals
@@ -149,6 +149,8 @@ protected:
     virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const = 0;
     virtual QModelIndex parent(const QModelIndex &child) const = 0;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const = 0;
+
+	virtual bool doInsertItems(QVariantList values) = 0;
 
 protected slots:
     //Properties protected SET methods

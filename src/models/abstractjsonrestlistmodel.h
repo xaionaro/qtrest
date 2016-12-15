@@ -7,17 +7,18 @@ class QNetworkReply;
 
 class AbstractJsonRestListModel : public BaseRestListModel
 {
-    Q_OBJECT
-public:
-    explicit AbstractJsonRestListModel(QObject *parent = 0);
+		Q_OBJECT
+	public:
+		explicit AbstractJsonRestListModel(QObject *parent = 0);
 
-protected:
-    //for get list
-    virtual QVariantList getVariantList(QByteArray bytes);
+	protected:
+		//for get list
+		virtual QVariantList getVariantList(QByteArray bytes);
+		//virtual bool doInsertItems(QVariantList values);
 
-private:
-    //for get details for one element
-    QVariantMap getVariantMap(QByteArray bytes);
+	private:
+		//for get details for one element
+		QVariantMap getVariantMap(QByteArray bytes);
 };
 
 #endif // ABSJSONRESTLISTMODEL_H
