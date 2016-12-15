@@ -1,5 +1,5 @@
 #include "detailsmodel.h"
-#include "baserestlistmodel.h"
+#include "baserestitemmodel.h"
 #include <QDebug>
 
 DetailsModel::DetailsModel()
@@ -11,7 +11,7 @@ bool DetailsModel::filterAcceptsRow(int source_row, const QModelIndex &source_pa
 {
     bool ret = false;
 
-    BaseRestListModel *sourceModel = static_cast<BaseRestListModel *> (this->sourceModel());
+    BaseRestItemModel *sourceModel = static_cast<BaseRestItemModel *> (this->sourceModel());
 
     if ( sourceModel != nullptr )
     {
