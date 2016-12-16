@@ -3,7 +3,6 @@
 
 #include <QAbstractItemModel>
 #include "restitem.h"
-#include "pagination.h"
 #include "detailsmodel.h"
 #include "apibase.h"
 
@@ -24,9 +23,6 @@ public:
     //Standard HATEOAS REST API params (https://en.wikipedia.org/wiki/HATEOAS, for example: https://github.com/yiisoft/yii2/blob/master/docs/guide-ru/rest-quick-start.md)
     //Specify sorting fields
     Q_PROPERTY(QStringList sort READ sort WRITE setSort NOTIFY sortChanged)
-
-    //Specify pagination
-    Q_PROPERTY(Pagination *pagination READ pagination)
     //Specify filters parametres
     Q_PROPERTY(QVariantMap filters READ filters WRITE setFilters NOTIFY filtersChanged)
     //Specify fields parameter
@@ -72,12 +68,12 @@ public:
     int idFieldRole() const;
     QString fetchDetailLastId() const;
     DetailsModel *detailsModel();
-    Pagination *pagination();
     QByteArray accept();
-    int count() const;
+	virtual int count() const = 0;
 
     //Overloaded system methdos
-    virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual QVariant data(const QModelIndex &index, int role) const = 0;
+	virtual RestItem *firstRestItem() = 0;
 
 signals:
     //Properties signals
@@ -89,7 +85,7 @@ signals:
     void loadingErrorCodeChanged(QNetworkReply::NetworkError loadingErrorCode);
     void fieldsChanged(QStringList fields);
     void idFieldChanged(QString idField);
-    void acceptChanged(QByteArray accept);
+	void acceptChanged(QByteArray accept);
     void apiInstanceChanged(APIBase *apiInstance);
 
 public slots:
@@ -101,9 +97,8 @@ public slots:
     void forceIdle();
 
     //Overloaded system methdos
-    bool canFetchMore(const QModelIndex &parent) const;
-    void fetchMore(const QModelIndex &parent);
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual bool canFetchMore(const QModelIndex &parent) const;
+	virtual void fetchMore(const QModelIndex &parent);
 
     //Properties public SET methods
     void setSort(QStringList sort);
@@ -128,29 +123,30 @@ protected:
     APIBase *apiInstance();
 
     //Update specific headers on updating
-    void updateHeadersData(QNetworkReply *reply);
+	virtual void updateHeadersData(QNetworkReply *reply);
 
     //Reset model data
-    void reset();
+	virtual void reset() = 0;
+
+	virtual const RestItem findItemById(QString id) = 0;
+	virtual void updateItem(QVariantMap value) = 0;
 
     //Auto generate role names by REST keys
-    void generateRoleNames();
+	void generateRoleNames(const RestItem &item);
     void generateDetailsRoleNames(QVariantMap item);
-
-    //Items management
-    RestItem createItem(QVariantMap value);
-    void updateItem(QVariantMap value);
-    RestItem findItemById(QString id);
-    void append(RestItem item);
 
     QHash<int, QByteArray> roleNames() const;
     QHash<int, QByteArray> detailsRoleNames() const;
 
     virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const = 0;
     virtual QModelIndex parent(const QModelIndex &child) const = 0;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const = 0;
+	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 	virtual bool doInsertItems(QVariantList values) = 0;
+	QString getRoleName(int roleId) const;
+
+	virtual void modelEndInsertRows();
+
 
 protected slots:
     //Properties protected SET methods
@@ -163,10 +159,9 @@ protected slots:
 
 private:
     //Properties store vars
-    QHash<int, QByteArray> m_roleNames;
-    int m_roleNamesIndex;
-    bool m_detailRoleNamesGenerated;
-    QList<RestItem> m_items;
+	QHash<int, QByteArray> m_roleNames;
+	int m_roleNamesIndex;
+	bool m_detailRoleNamesGenerated;
     QStringList m_fields;
     QString m_idField;
     QStringList m_sort;
@@ -176,7 +171,6 @@ private:
     QNetworkReply::NetworkError m_loadingErrorCode;
     QString m_fetchDetailLastId;
     DetailsModel m_detailsModel;
-    Pagination m_pagination;
     APIBase *m_apiInstance;
 };
 

@@ -1,97 +1,20 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
-/* Dmitry Yu Okunev <dyokunev@ut.mephi.ru>:
- *
- * Originally I copied this file:
- *   Qt/Examples/Qt-5.7/widgets/itemviews/simpletreemodel/treemodel.cpp
- *
- * and modified it in 2016-12-15
- */
-
 #include <QStringList>
 #include "baseresttreemodel.h"
 
 BaseRestTreeModel::BaseRestTreeModel(QObject *parent)
 	: BaseRestItemModel(parent)
 {
-	/*QList<QVariant> rootData;
-	rootData << "Title" << "Summary";
-	rootItem = new TreeItem(rootData);
-	setupModelData(QString("test1\ttest2\n    test3\ttest4\n").split(QString("\n")), rootItem);*/
+	rootItem = new RestTreeItem();
+
+/*	RestTreeItem *grandChildItem = new RestTreeItem();
+	RestTreeItem *childItem = new RestTreeItem();
+	rootItem->addChildItem(childItem);
+	childItem->addChildItem(grandChildItem);*/
 }
 
 BaseRestTreeModel::~BaseRestTreeModel()
 {
 	delete rootItem;
-}
-
-int BaseRestTreeModel::columnCount(const QModelIndex &parent) const
-{
-	if (parent.isValid())
-		return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
-	else
-		return rootItem->columnCount();
-}
-
-QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
-{
-	if (!index.isValid())
-		return QVariant();
-
-	if (role != Qt::DisplayRole)
-		return QVariant();
-
-	TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-
-	return item->data(index.column());
 }
 
 Qt::ItemFlags BaseRestTreeModel::flags(const QModelIndex &index) const
@@ -102,29 +25,20 @@ Qt::ItemFlags BaseRestTreeModel::flags(const QModelIndex &index) const
 	return QAbstractItemModel::flags(index);
 }
 
-QVariant BaseRestTreeModel::headerData(int section, Qt::Orientation orientation,
-				   int role) const
-{
-	if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-		return rootItem->data(section);
-
-	return QVariant();
-}
-
 QModelIndex BaseRestTreeModel::index(int row, int column, const QModelIndex &parent)
 		const
 {
 	if (!hasIndex(row, column, parent))
 		return QModelIndex();
 
-	TreeItem *parentItem;
+	RestTreeItem *parentItem;
 
 	if (!parent.isValid())
 		parentItem = rootItem;
 	else
-		parentItem = static_cast<TreeItem*>(parent.internalPointer());
+		parentItem = static_cast<RestTreeItem*>(parent.internalPointer());
 
-	TreeItem *childItem = parentItem->child(row);
+	RestTreeItem *childItem = parentItem->child(row);
 	if (childItem)
 		return createIndex(row, column, childItem);
 	else
@@ -136,89 +50,35 @@ QModelIndex BaseRestTreeModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
-	TreeItem *parentItem = childItem->parentItem();
+	RestTreeItem *childItem = static_cast<RestTreeItem*>(index.internalPointer());
+	RestTreeItem *parentItem = childItem->parentItem();
 
 	if (parentItem == rootItem)
 		return QModelIndex();
+
+	if (parentItem == NULL) {
+		qErrnoWarning("parentItem == NULL");
+		return QModelIndex();
+	}
 
 	return createIndex(parentItem->row(), 0, parentItem);
 }
 
 int BaseRestTreeModel::rowCount(const QModelIndex &parent) const
 {
-	return 0;
-	TreeItem *parentItem;
+	RestTreeItem *parentItem;
 	if (parent.column() > 0)
 		return 0;
 
 	if (!parent.isValid())
 		parentItem = rootItem;
 	else
-		parentItem = static_cast<TreeItem*>(parent.internalPointer());
+		parentItem = static_cast<RestTreeItem*>(parent.internalPointer());
 
-	return parentItem->childCount();
+	return parentItem->childItems().count();
 }
 
-void BaseRestTreeModel::setupModelData(const QStringList &lines, TreeItem *parent)
-{
-	QList<TreeItem*> parents;
-	QList<int> indentations;
-	parents << parent;
-	indentations << 0;
-
-	int number = 0;
-
-	while (number < lines.count()) {
-		int position = 0;
-		while (position < lines[number].length()) {
-			if (lines[number].at(position) != ' ')
-				break;
-			position++;
-		}
-
-		QString lineData = lines[number].mid(position).trimmed();
-
-		if (!lineData.isEmpty()) {
-			// Read the column data from the rest of the line.
-			QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-			QList<QVariant> columnData;
-			for (int column = 0; column < columnStrings.count(); ++column)
-				columnData << columnStrings[column];
-
-			if (position > indentations.last()) {
-				// The last child of the current parent is now the new parent
-				// unless the current parent has no children.
-
-				if (parents.last()->childCount() > 0) {
-					parents << parents.last()->child(parents.last()->childCount()-1);
-					indentations << position;
-				}
-			} else {
-				while (position < indentations.last() && parents.count() > 0) {
-					parents.pop_back();
-					indentations.pop_back();
-				}
-			}
-
-			// Append a new item to the current parent's list of children.
-			parents.last()->appendChild(new TreeItem(columnData, parents.last()));
-		}
-
-		++number;
-	}
-
-	qDebug() << "number == " << number << "\n";
-}
-
-
-bool BaseRestTreeModel::doInsertItems(QVariantList values) {
-	QList<QVariant> rootData;
-	rootData << "Title" << "Summary";
-	rootItem = new TreeItem(rootData);
-	setupModelData(QString("test1\ttest2\n    test3\ttest4\n").split(QString("\n")), rootItem);
-
-	return false;
+bool BaseRestTreeModel::doInsertItems(QVariantList values) {	
 	//prepare vars
 	int insertFrom  = rowCount();
 	int insertCount = rowCount()+values.count()-1;
@@ -238,13 +98,132 @@ bool BaseRestTreeModel::doInsertItems(QVariantList values) {
 	}
 
 	//append rows to model
-	beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount);
+	QModelIndex idx = this->index(rowCount(), 0);
+	beginInsertRows(idx, insertFrom, insertCount);
 
-	QListIterator<QVariant> i(values);
-	while ( i.hasNext() ) {
-		RestItem item = createItem(i.next().toMap());
-		append(item);
-	}
+	rootItem->addRecursiveData(values, this->idField(), this->childrenField());
+	//this->addRecursiveData(rootItem, values, this->idField(), this->childrenField(), idx);
 
 	return true;
+}
+
+
+void BaseRestTreeModel::addRecursiveData(RestTreeItem *curItem, const QVariantList &values, QString idFieldName, QString childrenFieldName, QModelIndex idx) {
+	QListIterator<QVariant> i(values);
+	while ( i.hasNext() ) {
+		QVariantMap   fields = i.next().toMap();
+		RestTreeItem *item   = new RestTreeItem(fields, idFieldName, curItem);
+		qDebug() << "id == " << fields[idFieldName];
+		QVariant childrenField = fields[childrenFieldName];
+		if (childrenField.isValid()) {
+			QModelIndex curIdx = this->index(0, 0, idx);
+			QVariantList children = childrenField.toList();
+			this->addRecursiveData(item, children, idFieldName, childrenFieldName, curIdx);
+		}
+
+		curItem->addChildItem(item);
+	}
+}
+
+void BaseRestTreeModel::modelEndInsertRows()
+{
+	this->endInsertRows();
+}
+
+/*RestTreeItem *BaseRestTreeModel::findTreeItemByIndex(QModelIndex idx) const
+{
+	QList<QModelIndex> path = getTreeItemPath(idx);
+
+	RestTreeItem *curNode = this->rootItem;
+	while (path.count() > 0) {
+		QModelIndex curIdx = path.takeFirst();
+		curNode = curNode->child(curIdx.row());
+	}
+
+	return curNode;
+}*/
+
+QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid())
+		return QVariant();
+
+	//RestTreeItem *treeItem = this->findTreeItemByIndex(index);
+	RestTreeItem *treeItem = static_cast<RestTreeItem*>(index.internalPointer());
+	return treeItem->value(this->getRoleName(role));
+}
+
+int BaseRestTreeModel::count() const
+{
+	qFatal("not implemented, yet");
+	return 0;
+}
+
+RestItem *BaseRestTreeModel::firstRestItem() {
+	if (this->rootItem->childCount() == 0) {
+		qFatal("rootItem->childCount() == 0");
+	}
+	return this->rootItem->child(0)->restItem();
+}
+
+
+void BaseRestTreeModel::reset()
+{
+	this->beginResetModel();
+	qDeleteAll(this->rootItem->childItems());
+	this->endResetModel();
+}
+
+
+const RestItem BaseRestTreeModel::findItemById(QString id)
+{
+	Q_UNUSED(id)
+	qFatal("not implemented, yet");
+	return RestItem(QVariantMap(), "");
+}
+
+
+void BaseRestTreeModel::updateItem(QVariantMap value)
+{
+	Q_UNUSED(value)
+	qFatal("not implemented, yet");
+}
+
+QList<QModelIndex> BaseRestTreeModel::getTreeItemPath(QModelIndex idx) const
+{
+	QList<QModelIndex> path;
+
+	do {
+		path.push_back(idx);
+		idx = idx.parent();
+	} while (idx.isValid());
+
+	return path;
+}
+
+
+
+void BaseRestTreeModel::setChildrenField(QString childrenField)
+{
+	if (m_childrenField == childrenField)
+		return;
+
+	m_childrenField = childrenField;
+	emit childrenFieldChanged(childrenField);
+}
+
+QString BaseRestTreeModel::childrenField() const
+{
+	return this->m_childrenField;
+}
+
+
+const QList<RestTreeItem *> BaseRestTreeModel::tree() const
+{
+	return this->rootItem->childItems();
+}
+
+const QList<QObject *> BaseRestTreeModel::treeAsQObjects() const
+{
+	return this->rootItem->childItemsAsQObject();
 }

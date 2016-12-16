@@ -38,3 +38,4 @@ QVariantMap AbstractJsonRestTreeModel::getVariantMap(QByteArray bytes)
 
     return obj.toVariantMap();
 }
+

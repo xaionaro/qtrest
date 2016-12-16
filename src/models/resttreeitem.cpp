@@ -57,55 +57,105 @@
  */
 
 #include <QStringList>
+#include <QDebug>
 
-#include "treeitem.h"
+#include "resttreeitem.h"
 
-
-TreeItem::TreeItem(const QList<QVariant> &data, TreeItem *parent)
+RestTreeItem::RestTreeItem(QVariantMap object, QString idField, RestTreeItem *parent, QObject *qParent) :
+	QObject(qParent),
+	RestItem(object, idField),
+	m_childItems(QList<RestTreeItem*>()),
+	m_isOpen(false),
+	m_parentItem(parent)
 {
-    m_parentItem = parent;
-    m_itemData = data;
 }
 
-TreeItem::~TreeItem()
+RestTreeItem::~RestTreeItem()
 {
-    qDeleteAll(m_childItems);
+	qDeleteAll(this->childItems());
 }
 
-void TreeItem::appendChild(TreeItem *item)
-{
-    m_childItems.append(item);
+const QList<RestTreeItem *> &RestTreeItem::childItems() const{
+	return m_childItems;
 }
 
-TreeItem *TreeItem::child(int row)
-{
-    return m_childItems.value(row);
+const QList<QObject *> RestTreeItem::childItemsAsQObject() const{
+	QList<QObject *> res;
+	res.reserve(m_childItems.count());
+	for(auto i : m_childItems)
+		res.append(i);
+	return res;
 }
 
-int TreeItem::childCount() const
-{
-    return m_childItems.count();
+void RestTreeItem::addChildItem(RestTreeItem *childItem){
+	childItem->setParent(this);
+	m_childItems.append(childItem);
+	emit childItemsChanged();
+	if(m_childItems.count() == 1)
+		emit hasChildChanged();
 }
 
-int TreeItem::columnCount() const
-{
-    return m_itemData.count();
+bool RestTreeItem::isOpen() const{
+	return m_isOpen;
 }
 
-QVariant TreeItem::data(int column) const
+void RestTreeItem::setIsOpen(bool isOpen){
+	if(isOpen != m_isOpen){
+		m_isOpen = isOpen;
+		emit isOpenChanged();
+	}
+}
+
+bool RestTreeItem::hasChild() const{
+	return !m_childItems.isEmpty();
+}
+
+
+RestTreeItem *RestTreeItem::child(int row)
+{
+	return this->childItems().value(row);
+}
+
+/*QVariant RestTreeItem::data(int column) const
 {
     return m_itemData.value(column);
-}
+}*/
 
-TreeItem *TreeItem::parentItem()
+RestTreeItem *RestTreeItem::parentItem()
 {
     return m_parentItem;
 }
 
-int TreeItem::row() const
+int RestTreeItem::row() const
 {
     if (m_parentItem)
-        return m_parentItem->m_childItems.indexOf(const_cast<TreeItem*>(this));
+		return m_parentItem->m_childItems.indexOf(const_cast<RestTreeItem*>(this));
 
     return 0;
+}
+
+RestItem *RestTreeItem::restItem() {
+	return dynamic_cast<RestItem *>(this);
+}
+
+void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldName, QString childrenFieldName) {
+	QListIterator<QVariant> i(values);
+	while ( i.hasNext() ) {
+		QVariantMap   fields = i.next().toMap();
+		RestTreeItem *item   = new RestTreeItem(fields, idFieldName, this);
+		qDebug() << "id == " << fields[idFieldName];
+		QVariant childrenField = fields[childrenFieldName];
+		if (childrenField.isValid()) {
+			QVariantList children = childrenField.toList();
+			item->addRecursiveData(children, idFieldName, childrenFieldName);
+		}
+
+		this->addChildItem(item);
+	}
+	emit this->childItemsChanged();
+}
+
+int RestTreeItem::childCount() const
+{
+	return this->childItems().count();
 }

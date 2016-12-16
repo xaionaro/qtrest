@@ -62,34 +62,55 @@
 #include <QObject>
 #include <QModelIndex>
 #include "baserestitemmodel.h"
-#include "treeitem.h"
+#include "resttreeitem.h"
 
 class BaseRestTreeModel : public BaseRestItemModel
 {
 
-	Q_OBJECT
+		Q_OBJECT
 
-public:
-	explicit BaseRestTreeModel(QObject *parent = 0);
-	~BaseRestTreeModel();
+	public:
+		Q_PROPERTY(QList<QObject*> tree READ treeAsQObjects NOTIFY treeChanged)
+		const QList<RestTreeItem*> tree() const;
+		const QList<QObject*> treeAsQObjects() const;
 
-	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
-	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
-	QVariant headerData(int section, Qt::Orientation orientation,
-			int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
-	QModelIndex index(int row, int column,
-			  const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
-	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
-	int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+		explicit BaseRestTreeModel(QObject *parent = 0);
+		~BaseRestTreeModel();
 
-protected:
-	virtual bool doInsertItems(QVariantList values);
+		Q_PROPERTY(QString childrenField READ childrenField WRITE setChildrenField NOTIFY childrenFieldChanged)
 
-private:
-	void setupModelData(const QStringList &lines, TreeItem *parent);
+		QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+		Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+		//QVariant headerData(int section, Qt::Orientation orientation,
+		//		int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+		QModelIndex index(int row, int column,
+						  const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+		QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
+		int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+		int count() const;
+		RestItem *firstRestItem();
+		QList<QModelIndex> getTreeItemPath(QModelIndex idx) const;
+		//RestTreeItem *findTreeItemByIndex(QModelIndex idx) const;
+		QString childrenField() const;
 
-	TreeItem *rootItem;
+	signals:
+		void childrenFieldChanged(QString childrenField);
+		void treeChanged();
+
+	public slots:
+		void setChildrenField(QString childrenField);
+
+	protected:
+		virtual bool doInsertItems(QVariantList values);
+		void reset();
+		const RestItem findItemById(QString id);
+		void updateItem(QVariantMap value);
+		void modelEndInsertRows() Q_DECL_OVERRIDE;
+		void addRecursiveData(RestTreeItem *curItem, const QVariantList &values, QString idFieldName, QString childrenFieldName, QModelIndex idx);
+
+	private:
+		RestTreeItem *rootItem;
+		QString m_childrenField;
 };
 
 #endif // BASERESTTREEMODEL_H

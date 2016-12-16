@@ -1,17 +1,18 @@
 #include "restitem.h"
 #include <QDebug>
 
-RestItem::RestItem(QVariantMap object, QString idField) {
-    m_object = object;
-    m_idField = idField;
-    m_isUpdated = false;
+RestItem::RestItem(QVariantMap object, QString idField) :
+	m_object(object),
+	m_idField(idField),
+	m_isUpdated(false)
+{
 }
 
-QVariant RestItem::value(QString key) {
+QVariant RestItem::value(QString key) const {
     return m_object.value(key);
 }
 
-QStringList RestItem::keys() {
+QStringList RestItem::keys() const {
     return m_object.keys();
 }
 
@@ -19,7 +20,7 @@ QString RestItem::id() const {
     return m_object.value(m_idField).toString();
 }
 
-bool RestItem::isUpdated() {
+bool RestItem::isUpdated() const {
     return m_isUpdated;
 }
 

@@ -4,20 +4,22 @@
 #include <QVariantMap>
 
 class RestItem {
-public:
-    explicit RestItem(QVariantMap object, QString idField);
-    QVariant value(QString key);
-    QStringList keys();
-    QString id() const;
-    bool isUpdated();
+	public:
+		explicit RestItem(QVariantMap object = QVariantMap(), QString idField = "");
+		QVariant value(QString key) const;
+		QStringList keys() const;
+		QString id() const;
+		bool isUpdated() const;
 
-    void update (QVariantMap value);
+		void update (QVariantMap value);
 
-    bool operator==(const RestItem &other);
-private:
-    QVariantMap m_object;
-    QString m_idField;
-    bool m_isUpdated;
+		bool operator==(const RestItem &other);
+
+	private:
+		QVariantMap m_object;
+		QString m_idField;
+		bool m_isUpdated;
 };
+
 
 #endif // RESTITEM_H
