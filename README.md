@@ -424,7 +424,7 @@ ListView {
 
 #### 5. Use tree
 
-No documentation, yet. But you can use project [mobile-voip-client](https://devel.mephi.ru/dyokunev/mobile-voip-client) as an example (it uses tree for model Unit and view UnitTree).
+No documentation, yet. But you can use project [mobile-voip-client](https://devel.mephi.ru/dyokunev/mobile-voip-client) as an example (it uses tree for [model](https://devel.mephi.ru/dyokunev/mobile-voip-client/src/master/models) Unit and [view](https://devel.mephi.ru/dyokunev/mobile-voip-client/src/master/views) UnitTree).
 
 ## Advanced usage
 
