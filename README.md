@@ -13,12 +13,13 @@ By default library support standard Yii2 REST API and Django REST Framework. Rea
 ## Features
 - Based on QAbstractListModel with fetchMore and canFetchMore support;
 - Support JSON and XML list data;
+- Support JSON tree data;
 - Pagination by per page, limit/offset or cursor;
 - Sorting data;
 - Filtering data;
 - Authentication;
 - StackView navigation;
-- Specify fields for GET list method;
+- Specify fields for GET list/tree method;
 - Lazy loading details item data;
 - Separate model and API methods;
 - Simple API implementation for your apps;
@@ -420,6 +421,10 @@ ListView {
     }
 }
 ```
+
+#### 5. Use tree
+
+No documentation, yet. But you can use project [mobile-voip-client](https://devel.mephi.ru/dyokunev/mobile-voip-client) as an example (it uses tree for model Unit and view UnitTree).
 
 ## Advanced usage
 
