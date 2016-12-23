@@ -5,6 +5,52 @@ BaseRestListModel::BaseRestListModel(QObject *parent) : BaseRestItemModel(parent
 
 }
 
+void BaseRestListModel::fetchMore(const QModelIndex &parent)
+{
+	Q_UNUSED(parent)
+
+	switch (loadingStatus()) {
+		case LoadingStatus::RequestToReload:
+			m_pagination.setCurrentPage(0);
+			m_pagination.setOffset(0);
+			m_pagination.setCursorValue(0);
+			setLoadingStatus(LoadingStatus::FullReloadProcessing);
+			break;
+		case LoadingStatus::Idle:
+			setLoadingStatus(LoadingStatus::LoadMoreProcessing);
+			break;
+		default:
+			return;
+			break;
+	}
+
+	switch(m_pagination.policy()) {
+		case Pagination::PageNumber: {
+			int nextPage = m_pagination.currentPage()+1;
+			m_pagination.setCurrentPage(nextPage);
+			break;
+		}
+		case Pagination::LimitOffset: {
+			int offset = m_pagination.offset()+m_pagination.limit();
+			m_pagination.setOffset(offset);
+			break;
+		}
+		case Pagination::Cursor: {
+			QString cursor = 0;
+			if (!m_items.isEmpty()) {
+				cursor = m_items.last().id();
+			}
+			m_pagination.setCursorValue(cursor);
+			break;
+		}
+		default:
+			break;
+	}
+
+	QNetworkReply *reply = fetchMoreImpl(parent);
+	connect(reply, SIGNAL(finished()), this, SLOT(fetchMoreFinished()));
+}
+
 QModelIndex BaseRestListModel::index(int row, int column, const QModelIndex &parent) const
 {
 	return hasIndex(row, column, parent) ? createIndex(row, column) : QModelIndex();
@@ -83,53 +129,6 @@ bool BaseRestListModel::canFetchMore(const QModelIndex &parent) const
 	}
 }
 
-void BaseRestListModel::fetchMore(const QModelIndex &parent)
-{
-	Q_UNUSED(parent)
-
-	switch (loadingStatus()) {
-	case LoadingStatus::RequestToReload:
-		m_pagination.setCurrentPage(0);
-		m_pagination.setOffset(0);
-		m_pagination.setCursorValue(0);
-		setLoadingStatus(LoadingStatus::FullReloadProcessing);
-		break;
-	case LoadingStatus::Idle:
-		setLoadingStatus(LoadingStatus::LoadMoreProcessing);
-		break;
-	default:
-		return;
-		break;
-	}
-
-	switch(m_pagination.policy()) {
-	case Pagination::PageNumber: {
-		int nextPage = m_pagination.currentPage()+1;
-		m_pagination.setCurrentPage(nextPage);
-		break;
-	}
-	case Pagination::LimitOffset: {
-		int offset = m_pagination.offset()+m_pagination.limit();
-		m_pagination.setOffset(offset);
-		break;
-	}
-	case Pagination::Cursor: {
-		QString cursor = 0;
-		if (!m_items.isEmpty()) {
-			cursor = m_items.last().id();
-		}
-		m_pagination.setCursorValue(cursor);
-		break;
-	}
-	default:
-		break;
-	}
-
-	QNetworkReply *reply = fetchMoreImpl(parent);
-	connect(reply, SIGNAL(finished()), this, SLOT(fetchMoreFinished()));
-}
-
-
 const RestItem BaseRestListModel::findItemById(QString id)
 {
 	QListIterator<RestItem> i(m_items);
@@ -141,12 +140,19 @@ const RestItem BaseRestListModel::findItemById(QString id)
 	}
 
 	qFatal("BaseRestItemModel::findItemById(): Cannot find item");
-	return RestItem(QVariantMap(), "");
+	return RestItem();
 }
 
 void BaseRestListModel::updateItem(QVariantMap value)
 {
-	RestItem item = findItemById(fetchDetailLastId());
+	QString id = fetchDetailLastId();
+	RestItem item = findItemById(id);
+
+	if (!item.isValid()) {
+		qWarning() << QString("No item with id %1").arg(id);
+		return;
+	}
+
 	int row = m_items.indexOf(item);
 	item.update(value);
 	m_items.replace(row, item);

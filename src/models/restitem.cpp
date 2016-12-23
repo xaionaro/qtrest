@@ -4,7 +4,8 @@
 RestItem::RestItem(QVariantMap object, QString idField) :
 	m_object(object),
 	m_idField(idField),
-	m_isUpdated(false)
+	m_isUpdated(false),
+	m_isValid(true)
 {
 }
 
@@ -22,6 +23,11 @@ QString RestItem::id() const {
 
 bool RestItem::isUpdated() const {
     return m_isUpdated;
+}
+
+bool RestItem::isValid() const
+{
+    return m_isValid;
 }
 
 void RestItem::update(QVariantMap value) {

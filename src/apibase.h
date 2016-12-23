@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include "pagination.h"
 
 class QNetworkAccessManager;
@@ -75,6 +76,8 @@ protected:
 
     QNetworkAccessManager *manager;
 
+    virtual QNetworkRequest createRequest(const QUrl &url) const;
+
     void setRawHeaders(QNetworkRequest *request);
     void connectReplyToErrors(QNetworkReply *reply);
 
@@ -86,9 +89,9 @@ protected slots:
 private:
     QByteArray m_accept;
     QByteArray m_baseUrl;
-    QByteArray m_authToken;
-    QByteArray m_authTokenHeader;
 	QByteArray m_acceptHeader;
+	QByteArray m_authToken;
+    QByteArray m_authTokenHeader;
 };
 
 #endif // APIMANAGER_H

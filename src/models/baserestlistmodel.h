@@ -38,7 +38,7 @@ class BaseRestListModel : public BaseRestItemModel
 
 	public slots:
 		bool canFetchMore(const QModelIndex &parent) const;
-		void fetchMore(const QModelIndex &parent);
+		virtual void fetchMore(const QModelIndex &parent);
 		int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 	private:

@@ -10,6 +10,7 @@ class RestItem {
 		QStringList keys() const;
 		QString id() const;
 		bool isUpdated() const;
+		bool isValid() const;
 
 		void update (QVariantMap value);
 
@@ -19,6 +20,7 @@ class RestItem {
 		QVariantMap m_object;
 		QString m_idField;
 		bool m_isUpdated;
+		bool m_isValid;
 };
 
 
