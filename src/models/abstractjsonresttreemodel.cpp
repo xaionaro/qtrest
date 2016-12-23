@@ -6,36 +6,38 @@
 
 AbstractJsonRestTreeModel::AbstractJsonRestTreeModel(QObject *parent) : BaseRestTreeModel(parent)
 {
-    setAccept("application/json");
+	setAccept("application/json");
 }
 
 QVariantList AbstractJsonRestTreeModel::getVariantTree(QByteArray bytes)
 {
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+	//QString str = QString::fromUtf8(bytes.data(), bytes.size());
 
-    QJsonParseError parseError;
-    QJsonDocument document = QJsonDocument::fromJson(bytes, &parseError);
-    QJsonArray jsonArray = document.array();
+	QJsonParseError parseError;
+	QJsonDocument document = QJsonDocument::fromJson(bytes, &parseError);
+	QJsonArray jsonArray = document.array();
 
-    if (parseError.error != QJsonParseError::NoError) {
-        qDebug() << parseError.errorString();
-    }
+	if (parseError.error != QJsonParseError::NoError) {
+		qDebug() << parseError.errorString();
+	}
 
-    return jsonArray.toVariantList();
+	qDebug() << "getVariantTree(): " << bytes;
+	return jsonArray.toVariantList();
 }
 
 QVariantMap AbstractJsonRestTreeModel::getVariantMap(QByteArray bytes)
 {
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+	//QString str = QString::fromUtf8(bytes.data(), bytes.size());
 
-    QJsonParseError parseError;
-    QJsonDocument document = QJsonDocument::fromJson(bytes, &parseError);
-    QJsonObject obj = document.object();
+	QJsonParseError parseError;
+	QJsonDocument document = QJsonDocument::fromJson(bytes, &parseError);
+	QJsonObject obj = document.object();
 
-    if (parseError.error != QJsonParseError::NoError) {
-        qDebug() << parseError.errorString();
-    }
+	if (parseError.error != QJsonParseError::NoError) {
+		qDebug() << parseError.errorString();
+	}
 
-    return obj.toVariantMap();
+	qDebug() << "getVariantMap(): " << bytes;
+	return obj.toVariantMap();
 }
 

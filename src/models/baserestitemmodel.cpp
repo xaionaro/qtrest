@@ -30,15 +30,15 @@ void BaseRestItemModel::fetchMore(const QModelIndex &parent)
 	Q_UNUSED(parent)
 
 	switch (loadingStatus()) {
-	case LoadingStatus::RequestToReload:
-		setLoadingStatus(LoadingStatus::FullReloadProcessing);
-		break;
-	case LoadingStatus::Idle:
-		setLoadingStatus(LoadingStatus::LoadMoreProcessing);
-		break;
-	default:
-		return;
-		break;
+		case LoadingStatus::RequestToReload:
+			setLoadingStatus(LoadingStatus::FullReloadProcessing);
+			break;
+		case LoadingStatus::Idle:
+			setLoadingStatus(LoadingStatus::LoadMoreProcessing);
+			break;
+		default:
+			return;
+			break;
 	}
 
 	QNetworkReply *reply = fetchMoreImpl(parent);
@@ -335,9 +335,21 @@ void BaseRestItemModel::generateRoleNames(const RestItem &item)
 		return;
 	}
 
-	QStringList keys = item.keys();
+	{
+		QStringList fields = this->fields();
+		foreach (QString field, fields) {
+			QByteArray k;
+			k.append(field);
+			if (!m_roleNames.key(k)) {
+				m_roleNamesIndex++;
+				m_roleNames[m_roleNamesIndex] = k;
+			}
+		}
+	}
 
 	if (rowCount() > 0) {
+		QStringList keys = item.keys();
+
 		foreach (QString key, keys) {
 			QByteArray k;
 			k.append(key);
@@ -360,6 +372,7 @@ void BaseRestItemModel::modelEndInsertRows()
 
 int BaseRestItemModel::columnCount(const QModelIndex &parent) const
 {
+	Q_UNUSED(parent)
 	return this->m_fields.count();
 }
 

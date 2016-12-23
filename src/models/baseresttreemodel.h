@@ -92,6 +92,8 @@ class BaseRestTreeModel : public BaseRestItemModel
 		QList<QModelIndex> getTreeItemPath(QModelIndex idx) const;
 		//RestTreeItem *findTreeItemByIndex(QModelIndex idx) const;
 		QString childrenField() const;
+		Q_INVOKABLE QVariantMap get( QModelIndex idx ) const;
+		Q_INVOKABLE QVariantList getChildrenIndexes( QModelIndex idx ) const;
 
 	signals:
 		void childrenFieldChanged(QString childrenField);

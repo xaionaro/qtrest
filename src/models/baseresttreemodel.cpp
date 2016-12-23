@@ -113,7 +113,7 @@ void BaseRestTreeModel::addRecursiveData(RestTreeItem *curItem, const QVariantLi
 	while ( i.hasNext() ) {
 		QVariantMap   fields = i.next().toMap();
 		RestTreeItem *item   = new RestTreeItem(fields, idFieldName, curItem);
-		qDebug() << "id == " << fields[idFieldName];
+		//qDebug() << "id == " << fields[idFieldName];
 		QVariant childrenField = fields[childrenFieldName];
 		if (childrenField.isValid()) {
 			QModelIndex curIdx = this->index(0, 0, idx);
@@ -145,8 +145,10 @@ void BaseRestTreeModel::modelEndInsertRows()
 
 QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
 {
-	if (!index.isValid())
+	if (!index.isValid()) {
+		qDebug("!index.isValid()");
 		return QVariant();
+	}
 
 	//RestTreeItem *treeItem = this->findTreeItemByIndex(index);
 	RestTreeItem *treeItem = static_cast<RestTreeItem*>(index.internalPointer());
@@ -226,4 +228,35 @@ const QList<RestTreeItem *> BaseRestTreeModel::tree() const
 const QList<QObject *> BaseRestTreeModel::treeAsQObjects() const
 {
 	return this->rootItem->childItemsAsQObject();
+}
+
+QVariantMap BaseRestTreeModel::get( QModelIndex idx ) const {
+	QVariantMap map;
+	QHash<int, QByteArray> roleNames = this->roleNames();
+	foreach(int k, roleNames.keys()) {
+		map[roleNames.value(k)] = data(idx, k);
+	}
+	//qDebug() << "get() -> " << map;
+	return map;
+}
+
+QVariantList BaseRestTreeModel::getChildrenIndexes(QModelIndex index) const
+{
+	if (!index.isValid()) {
+		qDebug() << "getChildrenIndexes(): !index.isValid(): " << index;
+		return QVariantList();
+	}
+
+
+	QVariantList indexes;
+	RestTreeItem *parent = static_cast<RestTreeItem*>(index.internalPointer());
+
+	int childCount = parent->childCount();
+	for(int i = 0; i != childCount; i++) {
+		RestTreeItem *child = parent->child(i);
+		indexes.push_back(createIndex(i, 0, child));
+	}
+
+	return indexes;
+
 }

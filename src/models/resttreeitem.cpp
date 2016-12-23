@@ -143,7 +143,7 @@ void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldN
 	while ( i.hasNext() ) {
 		QVariantMap   fields = i.next().toMap();
 		RestTreeItem *item   = new RestTreeItem(fields, idFieldName, this);
-		qDebug() << "id == " << fields[idFieldName];
+		//qDebug() << "id == " << fields[idFieldName];
 		QVariant childrenField = fields[childrenFieldName];
 		if (childrenField.isValid()) {
 			QVariantList children = childrenField.toList();

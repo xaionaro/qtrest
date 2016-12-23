@@ -99,12 +99,12 @@ public slots:
 private:
     int m_perPage;
     int m_currentPage = 0;
-    QString m_currentPageHeader;
     int m_totalCount;
-    QString m_totalCountHeader;
     int m_pageCount;
-    QString m_pageCountHeader;
-    PaginationPolicy m_policy;
+	QString m_currentPageHeader;
+	QString m_totalCountHeader;
+	QString m_pageCountHeader;
+	PaginationPolicy m_policy;
     int m_limit;
     int m_offset;
     QString m_cursorQueryParam;

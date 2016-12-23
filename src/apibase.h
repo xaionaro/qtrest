@@ -86,9 +86,9 @@ protected slots:
 private:
     QByteArray m_accept;
     QByteArray m_baseUrl;
-    QByteArray m_acceptHeader;
     QByteArray m_authToken;
     QByteArray m_authTokenHeader;
+	QByteArray m_acceptHeader;
 };
 
 #endif // APIMANAGER_H
