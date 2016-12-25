@@ -260,3 +260,88 @@ QVariantList BaseRestTreeModel::getChildrenIndexes(QModelIndex index) const
 	return indexes;
 
 }
+
+QVariantList BaseRestTreeModel::getIndexesByFieldValue_recursive( QString fieldName, QVariant fieldValue, int searchFlags, QModelIndex parentIndex ) const
+{
+	return this->getIndexesByFieldValue_recursive(fieldName, fieldValue, QFlags<SearchFlags>(searchFlags), parentIndex);
+}
+
+QVariantList BaseRestTreeModel::getIndexesByFieldValue_recursive( QString fieldName, QVariant fieldValue, QFlags<SearchFlags> searchFlags, QModelIndex parentIndex ) const
+{
+	QVariantList resultIndexes;
+
+	RestTreeItem *parent;
+	if (parentIndex.isValid()) {
+		parent = static_cast<RestTreeItem*>(parentIndex.internalPointer());
+	} else {
+		parent = this->rootItem;
+	}
+
+	if (searchFlags.testFlag(CaseInsensitive)) {
+		fieldValue = fieldValue.toString().toLower();
+	}
+
+	int childCount = parent->childCount();
+	for(int i = 0; i != childCount; i++) {
+		RestTreeItem *child = parent->child(i);
+		QModelIndex childIndex = this->createIndex(i, 0, child);
+
+		QVariant value = child->value(fieldName);
+
+
+		if (searchFlags.testFlag(CaseInsensitive)) {
+			value = value.toString().toLower();
+		}
+
+		bool matches;
+		if (searchFlags.testFlag(MatchIfSubstring)) {
+			matches = value.toString().contains(fieldValue.toString());
+		} else {
+			matches = value == fieldValue;
+		}
+
+		if (matches) {
+			resultIndexes.push_back(childIndex);
+		}
+
+		QVariantList matchedGrandChildrenIndexes = this->getIndexesByFieldValue_recursive(fieldName, fieldValue, searchFlags, childIndex);
+		resultIndexes.append(matchedGrandChildrenIndexes);
+	}
+
+	return resultIndexes;
+}
+
+QModelIndex BaseRestTreeModel::getRootIndex() const
+{
+	return this->createIndex(0, 0, this->rootItem);
+}
+
+QModelIndex BaseRestTreeModel::getParentIndex(QModelIndex childIndex) const
+{
+	RestTreeItem *child = static_cast<RestTreeItem*>(childIndex.internalPointer());
+
+	RestTreeItem *parent = child->parentItem();
+	if (parent == NULL) {
+		return QModelIndex();
+	}
+
+	RestTreeItem *grandParent = parent->parentItem();
+	if (grandParent == NULL) {
+		return QModelIndex();
+	}
+
+	int parentCandidateCount = grandParent->childCount();
+	for(int i = 0; i != parentCandidateCount; i++) {
+		RestTreeItem *parentCandidate = grandParent->child(i);
+		if (parentCandidate == parent) {
+			return this->createIndex(i, 0, parent);
+		}
+	}
+
+	return QModelIndex();
+}
+
+bool BaseRestTreeModel::isValidIndex(QModelIndex index) const
+{
+	return index.isValid();
+}

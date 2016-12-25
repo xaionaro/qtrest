@@ -70,6 +70,12 @@ class BaseRestTreeModel : public BaseRestItemModel
 		Q_OBJECT
 
 	public:
+		enum SearchFlags  {
+			MatchIfSubstring = 0x01,
+			CaseInsensitive  = 0x02,
+		};
+		Q_ENUM(SearchFlags)
+
 		Q_PROPERTY(QList<QObject*> tree READ treeAsQObjects NOTIFY treeChanged)
 		const QList<RestTreeItem*> tree() const;
 		const QList<QObject*> treeAsQObjects() const;
@@ -94,6 +100,11 @@ class BaseRestTreeModel : public BaseRestItemModel
 		QString childrenField() const;
 		Q_INVOKABLE QVariantMap get( QModelIndex idx ) const;
 		Q_INVOKABLE QVariantList getChildrenIndexes( QModelIndex idx ) const;
+		QVariantList getIndexesByFieldValue_recursive(QString fieldName, QVariant fieldValue, QFlags<SearchFlags> searchFlags, QModelIndex parentIndex = QModelIndex() ) const;
+		Q_INVOKABLE QVariantList getIndexesByFieldValue_recursive(QString fieldName, QVariant fieldValue, int searchFlags, QModelIndex parentIndex ) const;
+		Q_INVOKABLE QModelIndex getRootIndex() const;
+		Q_INVOKABLE QModelIndex getParentIndex(QModelIndex childIndex) const;
+		Q_INVOKABLE bool isValidIndex(QModelIndex index) const;
 
 	signals:
 		void childrenFieldChanged(QString childrenField);
