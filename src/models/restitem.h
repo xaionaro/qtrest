@@ -15,12 +15,19 @@ class RestItem {
 		void update (QVariantMap value);
 
 		bool operator==(const RestItem &other);
+		bool isHidden() const;
+
+		void setIsHidden(bool isHiddenValue);
+
+		//virtual void hide();
+		//virtual void show();
 
 	private:
 		QVariantMap m_object;
 		QString m_idField;
 		bool m_isUpdated;
 		bool m_isValid;
+		bool m_isHidden;
 };
 
 

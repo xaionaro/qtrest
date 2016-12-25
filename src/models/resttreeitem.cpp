@@ -121,7 +121,7 @@ RestTreeItem *RestTreeItem::child(int row)
     return m_itemData.value(column);
 }*/
 
-RestTreeItem *RestTreeItem::parentItem()
+RestTreeItem *RestTreeItem::parentItem() const
 {
     return m_parentItem;
 }
@@ -158,4 +158,44 @@ void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldN
 int RestTreeItem::childCount() const
 {
 	return this->childItems().count();
+}
+
+void RestTreeItem::setIsHiddenRecursively(bool isHiddenValue) {
+	int childCountValue = this->childCount();
+
+	this->setIsHidden(isHiddenValue);
+
+	for (int i = 0; i < childCountValue; i++) {
+		RestTreeItem *childPtr = this->child(i);
+		childPtr->setIsHiddenRecursively(isHiddenValue);
+	}
+
+	return;
+}
+
+void RestTreeItem::hideRecursively() {
+	this->show();
+	setIsHiddenRecursively(true);
+}
+void RestTreeItem::showRecursively() {
+	this->hide();
+	setIsHiddenRecursively(false);
+}
+
+void RestTreeItem::setIsHiddenToRoot(bool isHiddenValue) {
+	RestTreeItem *item = this;
+
+	do {
+		item->setIsHidden(isHiddenValue);
+		item = item->parentItem();
+	} while(item != NULL);
+
+	return;
+}
+
+void RestTreeItem::hide() {
+	this->setIsHidden(true);
+}
+void RestTreeItem::show() {
+	this->setIsHiddenToRoot(false);
 }

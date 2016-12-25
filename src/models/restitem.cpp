@@ -5,7 +5,8 @@ RestItem::RestItem(QVariantMap object, QString idField) :
 	m_object(object),
 	m_idField(idField),
 	m_isUpdated(false),
-	m_isValid(true)
+	m_isValid(true),
+	m_isHidden(false)
 {
 }
 
@@ -41,4 +42,14 @@ void RestItem::update(QVariantMap value) {
 
 bool RestItem::operator==(const RestItem &other) {
     return id() == other.id();
+}
+
+bool RestItem::isHidden() const
+{
+	return this->m_isHidden;
+}
+
+void RestItem::setIsHidden(bool isHidden)
+{
+	this->m_isHidden = isHidden;
 }

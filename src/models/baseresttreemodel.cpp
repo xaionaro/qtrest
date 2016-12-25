@@ -125,9 +125,29 @@ void BaseRestTreeModel::addRecursiveData(RestTreeItem *curItem, const QVariantLi
 	}
 }
 
+void BaseRestTreeModel::rebuildCache(RestTreeItem *parent) {
+	if (parent == NULL) {
+		this->itemById.clear();
+		parent = this->rootItem;
+	}
+
+	int childCount = parent->childCount();
+	for(int i = 0; i != childCount; i++) {
+		RestTreeItem *child = parent->child(i);
+		this->itemById[child->id()] = child;
+
+		this->rebuildCache(child);
+	}
+
+	return;
+}
+
 void BaseRestTreeModel::modelEndInsertRows()
 {
 	this->endInsertRows();
+
+	this->rebuildCache();
+	//qDebug() << this->itemById;
 }
 
 /*RestTreeItem *BaseRestTreeModel::findTreeItemByIndex(QModelIndex idx) const
@@ -176,14 +196,48 @@ void BaseRestTreeModel::reset()
 	this->endResetModel();
 }
 
-
-const RestItem BaseRestTreeModel::findItemById(QString id)
+RestTreeItem *BaseRestTreeModel::findTreeItemById(QString id)
 {
-	Q_UNUSED(id)
-	qFatal("not implemented, yet");
-	return RestItem(QVariantMap(), "");
+	return this->itemById[id];
 }
 
+const RestItem *BaseRestTreeModel::findItemById(QString id)
+{
+	return this->findTreeItemById(id);
+}
+
+const QModelIndex BaseRestTreeModel::createIndexByItem(RestTreeItem *item) const {
+	Q_ASSERT(item != NULL);
+	RestTreeItem *parent = item->parentItem();
+
+	if (parent == NULL) {
+		qDebug() << "BaseRestTreeModel::createIndexByItem(): parent == NULL";
+		return QModelIndex();
+	}
+
+	int itemCandidateCount = parent->childCount();
+	for(int i = 0; i != itemCandidateCount; i++) {
+		RestTreeItem *itemCandidate = parent->child(i);
+		if (itemCandidate == item) {
+			return this->createIndex(i, 0, item);
+		}
+	}
+
+	qDebug() << "BaseRestTreeModel::createIndexByItem(): not found";
+	return QModelIndex();
+}
+
+const QModelIndex BaseRestTreeModel::findIndexById(QString id)
+{
+	RestTreeItem *item = this->findTreeItemById(id);
+	if (item == NULL) {
+		qDebug() << "BaseRestTreeModel::findIndexById(" << id << "): not found";
+		return QModelIndex();
+	}
+	QModelIndex index = this->createIndexByItem(item);
+	//qDebug() << "BaseRestTreeModel::findIndexById(" << id << "): " << index;
+	return index;
+}
 
 void BaseRestTreeModel::updateItem(QVariantMap value)
 {
@@ -325,23 +379,47 @@ QModelIndex BaseRestTreeModel::getParentIndex(QModelIndex childIndex) const
 		return QModelIndex();
 	}
 
-	RestTreeItem *grandParent = parent->parentItem();
-	if (grandParent == NULL) {
-		return QModelIndex();
-	}
-
-	int parentCandidateCount = grandParent->childCount();
-	for(int i = 0; i != parentCandidateCount; i++) {
-		RestTreeItem *parentCandidate = grandParent->child(i);
-		if (parentCandidate == parent) {
-			return this->createIndex(i, 0, parent);
-		}
-	}
-
-	return QModelIndex();
+	return this->createIndexByItem(parent);
 }
 
-bool BaseRestTreeModel::isValidIndex(QModelIndex index) const
+void BaseRestTreeModel::hideAll() {
+	this->rootItem->hideRecursively();
+}
+void BaseRestTreeModel::showAll() {
+	this->rootItem->showRecursively();
+}
+void BaseRestTreeModel::hideRecursivelyIndex(QModelIndex index) {
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+	item->hideRecursively();
+}
+void BaseRestTreeModel::showRecursivelyIndex(QModelIndex index) {
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+	item->showRecursively();
+}
+void BaseRestTreeModel::hideIndex(QModelIndex index) {
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+	item->hide();
+}
+void BaseRestTreeModel::showIndex(QModelIndex index) {
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+	item->show();
+}
+
+bool BaseRestTreeModel::isHiddenIndex(QModelIndex index) const
 {
-	return index.isValid();
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+
+	if (item == NULL) {
+		qDebug() << "BaseRestTreeModel::isHiddenIndex(): item == NULL (index == " << index << ")";
+		return true;
+	}
+	if (!item->isValid()) {
+		qDebug() << "BaseRestTreeModel::isHiddenIndex(): !item->isValid() (index == " << index << ")";
+		return true;
+	}
+
+	bool isHidden = item->isHidden();
+
+	qDebug() << "BaseRestTreeModel::isHiddenIndex(" << index << "): " << isHidden;
+	return isHidden;
 }

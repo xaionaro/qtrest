@@ -20,7 +20,6 @@ class BaseRestListModel : public BaseRestItemModel
 		//Items management
 		RestItem createItem(QVariantMap value);
 		void updateItem(QVariantMap value);
-		const RestItem findItemById(QString id);
 		void append(const RestItem &item);
 		void reset();
 		//void modelEndInsertRows();
@@ -40,6 +39,7 @@ class BaseRestListModel : public BaseRestItemModel
 		bool canFetchMore(const QModelIndex &parent) const;
 		virtual void fetchMore(const QModelIndex &parent);
 		int rowCount(const QModelIndex &parent = QModelIndex()) const;
+		const RestItem *findItemById(QString id);
 
 	private:
 		QList<RestItem> m_items;

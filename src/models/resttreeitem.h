@@ -28,7 +28,7 @@ class RestTreeItem : public QObject, public RestItem
 		//QList<RestTreeItem*> children();
 		QVariant data(int column) const;
 		int row() const;
-		RestTreeItem *parentItem();
+		RestTreeItem *parentItem() const;
 		RestItem *restItem();
 		void addRecursiveData(const QVariantList &values, QString idFieldName = "id", QString childrenFieldName = "children");
 
@@ -50,6 +50,14 @@ class RestTreeItem : public QObject, public RestItem
 		void childItemsChanged();
 		void isOpenChanged();
 		void hasChildChanged();
+
+	public slots:
+		void hideRecursively();
+		void showRecursively();
+		void hide();
+		void show();
+		void setIsHiddenRecursively(bool isHiddenValue);
+		void setIsHiddenToRoot(bool isHiddenValue);
 
 	private:
 		QList<RestTreeItem*> m_childItems;

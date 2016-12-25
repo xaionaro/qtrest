@@ -61,6 +61,7 @@
 
 #include <QObject>
 #include <QModelIndex>
+#include <QHash>
 #include "baserestitemmodel.h"
 #include "resttreeitem.h"
 
@@ -104,7 +105,6 @@ class BaseRestTreeModel : public BaseRestItemModel
 		Q_INVOKABLE QVariantList getIndexesByFieldValue_recursive(QString fieldName, QVariant fieldValue, int searchFlags, QModelIndex parentIndex ) const;
 		Q_INVOKABLE QModelIndex getRootIndex() const;
 		Q_INVOKABLE QModelIndex getParentIndex(QModelIndex childIndex) const;
-		Q_INVOKABLE bool isValidIndex(QModelIndex index) const;
 
 	signals:
 		void childrenFieldChanged(QString childrenField);
@@ -112,18 +112,32 @@ class BaseRestTreeModel : public BaseRestItemModel
 
 	public slots:
 		void setChildrenField(QString childrenField);
+		const RestItem *findItemById(QString id);
+		RestTreeItem *findTreeItemById(QString id);
+		const QModelIndex findIndexById(QString id);
+		void hideAll();
+		void showAll();
+		void hideRecursivelyIndex(QModelIndex index);
+		void showRecursivelyIndex(QModelIndex index);
+		void hideIndex(QModelIndex index);
+		void showIndex(QModelIndex index);
+		bool isHiddenIndex(QModelIndex index) const;
 
 	protected:
 		virtual bool doInsertItems(QVariantList values);
 		void reset();
-		const RestItem findItemById(QString id);
 		void updateItem(QVariantMap value);
 		void modelEndInsertRows() Q_DECL_OVERRIDE;
 		void addRecursiveData(RestTreeItem *curItem, const QVariantList &values, QString idFieldName, QString childrenFieldName, QModelIndex idx);
 
 	private:
+		void rebuildCache(RestTreeItem *parent = NULL);
+
 		RestTreeItem *rootItem;
 		QString m_childrenField;
+		QHash<QString, RestTreeItem *> itemById;
+		const QModelIndex createIndexByItem(RestTreeItem *item) const;
+
 };
 
 #endif // BASERESTTREEMODEL_H

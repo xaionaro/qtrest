@@ -129,29 +129,31 @@ bool BaseRestListModel::canFetchMore(const QModelIndex &parent) const
 	}
 }
 
-const RestItem BaseRestListModel::findItemById(QString id)
+const RestItem *BaseRestListModel::findItemById(QString id)
 {
 	QListIterator<RestItem> i(m_items);
 	while (i.hasNext()) {
-		RestItem item = i.next();
-		if (item.id() == id) {
+		const RestItem *item = &i.next();
+		if (item->id() == id) {
 			return item;
 		}
 	}
 
-	qFatal("BaseRestItemModel::findItemById(): Cannot find item");
-	return RestItem();
+	qFatal("BaseRestListModel::findItemById(): Cannot find item");
+	return NULL;
 }
 
 void BaseRestListModel::updateItem(QVariantMap value)
 {
 	QString id = fetchDetailLastId();
-	RestItem item = findItemById(id);
+	const RestItem *itemPtr = findItemById(id);
 
-	if (!item.isValid()) {
+	if (itemPtr == NULL) {
 		qWarning() << QString("No item with id %1").arg(id);
 		return;
 	}
+
+	RestItem item = *itemPtr;
 
 	int row = m_items.indexOf(item);
 	item.update(value);

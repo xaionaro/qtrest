@@ -71,7 +71,7 @@ public:
     QByteArray accept();
 	virtual int count() const = 0;
 
-    //Overloaded system methdos
+	//Overwritted system methdos
 	virtual QVariant data(const QModelIndex &index, int role) const = 0;
 	virtual RestItem *firstRestItem() = 0;
 
@@ -108,6 +108,10 @@ public slots:
 
     void setApiInstance(APIBase *apiInstance);
 
+	bool isValidIndex(QModelIndex index) const;
+	virtual bool isHiddenIndex(QModelIndex index) const;
+	virtual const RestItem *findItemById(QString id) = 0;
+
 protected:
     //reimplement this for call specific API method GET list
     virtual QNetworkReply *fetchMoreImpl(const QModelIndex &parent) = 0;
@@ -128,7 +132,6 @@ protected:
     //Reset model data
 	virtual void reset() = 0;
 
-	virtual const RestItem findItemById(QString id) = 0;
 	virtual void updateItem(QVariantMap value) = 0;
 
     //Auto generate role names by REST keys
@@ -156,6 +159,7 @@ protected slots:
     void setAccept(QString accept);
     void setLoadingErrorString(QString loadingErrorString);
     void setLoadingErrorCode(QNetworkReply::NetworkError loadingErrorCode);
+	//void setValueByIndex( QModelIndex index, QString FieldName, QVariant FieldValue ) const;
 
 private:
     //Properties store vars

@@ -83,7 +83,7 @@ void BaseRestItemModel::fetchMoreFinished()
 void BaseRestItemModel::fetchDetail(QString id)
 {
     m_fetchDetailLastId = id;
-	const RestItem &item = findItemById(id);
+	const RestItem &item = *findItemById(id);
     if (item.isUpdated()) {
         return;
     }
@@ -374,5 +374,30 @@ int BaseRestItemModel::columnCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent)
 	return this->m_fields.count();
+}
+
+
+bool BaseRestItemModel::isValidIndex(QModelIndex index) const
+{
+	return index.isValid();
+}
+
+bool BaseRestItemModel::isHiddenIndex(QModelIndex index) const
+{
+	RestItem *item = static_cast<RestItem*>(index.internalPointer());
+
+	if (item == NULL) {
+		qDebug() << "BaseRestItemModel::isHiddenIndex(): item == NULL (index == " << index << ")";
+		return true;
+	}
+	if (!item->isValid()) {
+		qDebug() << "BaseRestItemModel::isHiddenIndex(): !item->isValid() (index == " << index << ")";
+		return true;
+	}
+
+	bool isHidden = item->isHidden();
+
+	qDebug() << "BaseRestItemModel::isHiddenIndex(" << index << "): " << isHidden;
+	return isHidden;
 }
 
