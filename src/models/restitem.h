@@ -16,8 +16,10 @@ class RestItem {
 
 		bool operator==(const RestItem &other);
 		bool isHidden() const;
+		bool isClickable() const;
 
 		void setIsHidden(bool isHiddenValue);
+		void setIsClickable(bool isClickableValue);
 
 		//virtual void hide();
 		//virtual void show();
@@ -28,6 +30,7 @@ class RestItem {
 		bool m_isUpdated;
 		bool m_isValid;
 		bool m_isHidden;
+		bool m_isClickable;
 };
 
 

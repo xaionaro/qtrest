@@ -138,7 +138,7 @@ RestItem *RestTreeItem::restItem() {
 	return dynamic_cast<RestItem *>(this);
 }
 
-void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldName, QString childrenFieldName) {
+/*void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldName, QString childrenFieldName) {
 	QListIterator<QVariant> i(values);
 	while ( i.hasNext() ) {
 		QVariantMap   fields = i.next().toMap();
@@ -151,9 +151,10 @@ void RestTreeItem::addRecursiveData(const QVariantList &values, QString idFieldN
 		}
 
 		this->addChildItem(item);
+		emit item->contentChanged();
 	}
 	emit this->childItemsChanged();
-}
+}*/
 
 int RestTreeItem::childCount() const
 {

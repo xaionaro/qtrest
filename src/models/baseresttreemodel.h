@@ -109,6 +109,7 @@ class BaseRestTreeModel : public BaseRestItemModel
 	signals:
 		void childrenFieldChanged(QString childrenField);
 		void treeChanged();
+		void itemChanged(RestTreeItem *item);
 
 	public slots:
 		void setChildrenField(QString childrenField);
@@ -122,6 +123,7 @@ class BaseRestTreeModel : public BaseRestItemModel
 		void hideIndex(QModelIndex index);
 		void showIndex(QModelIndex index);
 		bool isHiddenIndex(QModelIndex index) const;
+		bool isClickableIndex(QModelIndex index) const;
 
 	protected:
 		virtual bool doInsertItems(QVariantList values);

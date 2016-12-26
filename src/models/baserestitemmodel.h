@@ -110,6 +110,7 @@ public slots:
 
 	bool isValidIndex(QModelIndex index) const;
 	virtual bool isHiddenIndex(QModelIndex index) const;
+	virtual bool isClickableIndex(QModelIndex index) const;
 	virtual const RestItem *findItemById(QString id) = 0;
 
 protected:

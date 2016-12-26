@@ -401,3 +401,24 @@ bool BaseRestItemModel::isHiddenIndex(QModelIndex index) const
 	return isHidden;
 }
 
+
+bool BaseRestItemModel::isClickableIndex(QModelIndex index) const
+{
+	RestItem *item = static_cast<RestItem*>(index.internalPointer());
+
+	if (item == NULL) {
+		qDebug() << "BaseRestItemModel::isClickableIndex(): item == NULL (index == " << index << ")";
+		return true;
+	}
+	if (!item->isValid()) {
+		qDebug() << "BaseRestItemModel::isClickableIndex(): !item->isValid() (index == " << index << ")";
+		return true;
+	}
+
+	bool isClickable = item->isClickable();
+
+	qDebug() << "BaseRestItemModel::isClickableIndex(" << index << "): " << isClickable;
+	return isClickable;
+}
+
+

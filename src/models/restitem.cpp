@@ -6,7 +6,8 @@ RestItem::RestItem(QVariantMap object, QString idField) :
 	m_idField(idField),
 	m_isUpdated(false),
 	m_isValid(true),
-	m_isHidden(false)
+	m_isHidden(false),
+	m_isClickable(true)
 {
 }
 
@@ -52,4 +53,15 @@ bool RestItem::isHidden() const
 void RestItem::setIsHidden(bool isHidden)
 {
 	this->m_isHidden = isHidden;
+}
+
+
+bool RestItem::isClickable() const
+{
+	return this->m_isClickable;
+}
+
+void RestItem::setIsClickable(bool isClickable)
+{
+	this->m_isClickable = isClickable;
 }

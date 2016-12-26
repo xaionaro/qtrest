@@ -101,8 +101,8 @@ bool BaseRestTreeModel::doInsertItems(QVariantList values) {
 	QModelIndex idx = this->index(rowCount(), 0);
 	beginInsertRows(idx, insertFrom, insertCount);
 
-	rootItem->addRecursiveData(values, this->idField(), this->childrenField());
-	//this->addRecursiveData(rootItem, values, this->idField(), this->childrenField(), idx);
+	//rootItem->addRecursiveData(values, this->idField(), this->childrenField());
+	this->addRecursiveData(rootItem, values, this->idField(), this->childrenField(), idx);
 
 	return true;
 }
@@ -122,6 +122,9 @@ void BaseRestTreeModel::addRecursiveData(RestTreeItem *curItem, const QVariantLi
 		}
 
 		curItem->addChildItem(item);
+		emit item->contentChanged();
+		emit this->itemChanged(item);
+		//qDebug() << "itemChanged()";
 	}
 }
 
@@ -147,6 +150,8 @@ void BaseRestTreeModel::modelEndInsertRows()
 	this->endInsertRows();
 
 	this->rebuildCache();
+
+	emit this->treeChanged();
 	//qDebug() << this->itemById;
 }
 
@@ -422,4 +427,23 @@ bool BaseRestTreeModel::isHiddenIndex(QModelIndex index) const
 
 	qDebug() << "BaseRestTreeModel::isHiddenIndex(" << index << "): " << isHidden;
 	return isHidden;
+}
+
+bool BaseRestTreeModel::isClickableIndex(QModelIndex index) const
+{
+	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
+
+	if (item == NULL) {
+		qDebug() << "BaseRestTreeModel::isClickableIndex(): item == NULL (index == " << index << ")";
+		return true;
+	}
+	if (!item->isValid()) {
+		qDebug() << "BaseRestTreeModel::isClickableIndex(): !item->isValid() (index == " << index << ")";
+		return true;
+	}
+
+	bool isClickable = item->isClickable();
+
+	qDebug() << "BaseRestTreeModel::isClickableIndex(" << index << "): " << isClickable;
+	return isClickable;
 }
