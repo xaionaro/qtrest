@@ -414,6 +414,10 @@ bool BaseRestTreeModel::isHiddenIndex(QModelIndex index) const
 {
 	RestTreeItem *item = static_cast<RestTreeItem*>(index.internalPointer());
 
+	if (!index.isValid()) {
+		return true;
+	}
+
 	if (item == NULL) {
 		qDebug() << "BaseRestTreeModel::isHiddenIndex(): item == NULL (index == " << index << ")";
 		return true;
@@ -425,7 +429,7 @@ bool BaseRestTreeModel::isHiddenIndex(QModelIndex index) const
 
 	bool isHidden = item->isHidden();
 
-	qDebug() << "BaseRestTreeModel::isHiddenIndex(" << index << "): " << isHidden;
+	//qDebug() << "BaseRestTreeModel::isHiddenIndex(" << index << "): " << isHidden;
 	return isHidden;
 }
 
@@ -444,6 +448,6 @@ bool BaseRestTreeModel::isClickableIndex(QModelIndex index) const
 
 	bool isClickable = item->isClickable();
 
-	qDebug() << "BaseRestTreeModel::isClickableIndex(" << index << "): " << isClickable;
+	//qDebug() << "BaseRestTreeModel::isClickableIndex(" << index << "): " << isClickable;
 	return isClickable;
 }

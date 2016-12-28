@@ -60,7 +60,7 @@ void BaseRestItemModel::fetchMoreFinished()
 
     QVariantList values = getVariantList(reply->readAll());
 
-	qDebug() << "values.count == " << values.count();
+	//qDebug() << "values.count == " << values.count();
 	if ( !this->doInsertItems(values) ) {
 		setLoadingStatus(LoadingStatus::Error);
 		emit countChanged();
@@ -72,7 +72,7 @@ void BaseRestItemModel::fetchMoreFinished()
 	RestItem *item = this->firstRestItem();
 	generateRoleNames(*item);
 
-	qDebug() << "modelEndInsertRows()…";
+	//qDebug() << "modelEndInsertRows()…";
 	this->modelEndInsertRows();
 
     setLoadingStatus(LoadingStatus::Idle);
