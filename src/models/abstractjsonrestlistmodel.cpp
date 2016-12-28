@@ -11,7 +11,7 @@ AbstractJsonRestListModel::AbstractJsonRestListModel(QObject *parent) : BaseRest
 
 QVariantList AbstractJsonRestListModel::getVariantList(QByteArray bytes)
 {
-    QString str = QString::fromUtf8(bytes.data(), bytes.size());
+	//QString str = QString::fromUtf8(bytes.data(), bytes.size());
 
     QJsonParseError parseError;
     QJsonDocument document = QJsonDocument::fromJson(bytes, &parseError);

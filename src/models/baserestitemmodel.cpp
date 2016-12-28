@@ -47,37 +47,77 @@ void BaseRestItemModel::fetchMore(const QModelIndex &parent)
 
 void BaseRestItemModel::fetchMoreFinished()
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (apiInstance()->checkReplyIsError(reply) || !reply->isFinished()) {
-        return;
-    }
-
-    if (this->loadingStatus() == LoadingStatus::Idle) {
-        return;
-    }
-
-    updateHeadersData(reply);
-
-    QVariantList values = getVariantList(reply->readAll());
-
-	//qDebug() << "values.count == " << values.count();
-	if ( !this->doInsertItems(values) ) {
-		setLoadingStatus(LoadingStatus::Error);
-		emit countChanged();
-		qDebug() << "Nothing to insert! Please check your parser!" << count() << loadingStatus();
+	QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+	if (apiInstance()->checkReplyIsError(reply) || !reply->isFinished()) {
 		return;
 	}
 
-    //get all role names
-	RestItem *item = this->firstRestItem();
-	generateRoleNames(*item);
+	if (this->loadingStatus() == LoadingStatus::Idle) {
+		return;
+	}
 
-	//qDebug() << "modelEndInsertRows()…";
-	this->modelEndInsertRows();
+	updateHeadersData(reply);
 
-    setLoadingStatus(LoadingStatus::Idle);
+	QVariantList values = getVariantList(reply->readAll());
 
-    emit countChanged();
+	this->setAllValues(values, this->loadingStatus() == LoadingStatus::FullReloadProcessing);
+}
+
+void BaseRestItemModel::setAllValues(QVariantList values, bool fullReloadProcessing) {
+	bool hasError = false;
+	//qDebug() << "values.count == " << values.count();
+
+	//prepare vars
+	int insertFrom  = rowCount();
+	int insertCount = rowCount()+values.count()-1;
+
+	//check if we need to full reload
+	if (fullReloadProcessing) {
+		qDebug("this->loadingStatus() == LoadingStatus::FullReloadProcessing");
+		reset();
+		insertFrom  = rowCount();
+		insertCount = values.count()-1;
+	}
+
+	//check for assertion or empty data
+	if (insertCount < insertFrom) { insertCount = insertFrom; }
+
+	if (insertCount == 0) {
+		qDebug() << "Nothing to insert! Please check your parser!" << count() << loadingStatus();
+		hasError = true;
+	}
+
+	if (!hasError) {
+		//append rows to model
+		beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount);
+
+		if ( !this->doInsertItems(values) ) {
+			qDebug() << "Error from this->doInsertItems()";
+			hasError = true;
+			this->modelEndInsertRows();
+		}
+	}
+
+	if (!hasError) {
+		//get all role names
+		RestItem *item = this->firstRestItem();
+		generateRoleNames(*item);
+
+		this->modelEndInsertRows();
+	}
+
+	if (hasError) {
+		setLoadingStatus(LoadingStatus::Error);
+	} else {
+		setLoadingStatus(LoadingStatus::Idle);
+	}
+
+	emit countChanged();
+}
+
+QVariantMap BaseRestItemModel::preProcessItem ( QVariantMap item )
+{
+	return item;
 }
 
 void BaseRestItemModel::fetchDetail(QString id)

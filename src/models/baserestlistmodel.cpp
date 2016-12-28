@@ -68,30 +68,10 @@ int BaseRestListModel::columnCount(const QModelIndex &parent) const
 
 bool BaseRestListModel::doInsertItems(QVariantList values) {
 
-	//prepare vars
-	int insertFrom  = rowCount();
-	int insertCount = rowCount()+values.count()-1;
-
-	//check if we need to full reload
-	if (this->loadingStatus() == LoadingStatus::FullReloadProcessing) {
-		reset();
-		insertFrom  = rowCount();
-		insertCount = values.count()-1;
-	}
-
-	//check for assertion or empty data
-	if (insertCount < insertFrom) { insertCount = insertFrom; }
-
-	if (insertCount == 0) {
-		return false;
-	}
-
-	//append rows to model
-	beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount);
-
 	QListIterator<QVariant> i(values);
 	while ( i.hasNext() ) {
 		QVariantMap fields = i.next().toMap();
+		//qDebug() << "fields: " << fields;
 		append(createItem(fields));
 	}
 
@@ -161,6 +141,22 @@ void BaseRestListModel::updateItem(QVariantMap value)
 	emit dataChanged(index(row),index(row));
 }
 
+const RestItem &BaseRestListModel::at(int row) const
+{
+	const RestItem &result = this->m_items.at(row);
+	//qDebug() << row << ": " << result.object() << "; ";
+	return result;
+}
+
+QVariantMap BaseRestListModel::get( const QModelIndex &index ) const {
+	if (index.row() < 0 || index.row() >= m_items.count()) {
+		qDebug() << "Row not found" << index.row();
+		return QVariantMap();
+	}
+
+	return this->at(index.row()).object();
+}
+
 QVariant BaseRestListModel::data(const QModelIndex &index, int role) const
 {
 	if (index.row() < 0 || index.row() >= m_items.count()) {
@@ -168,7 +164,7 @@ QVariant BaseRestListModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	return m_items.at(index.row()).value(this->getRoleName(role));
+	return this->at(index.row()).value(this->getRoleName(role));
 }
 
 int BaseRestListModel::count() const

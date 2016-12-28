@@ -79,30 +79,8 @@ int BaseRestTreeModel::rowCount(const QModelIndex &parent) const
 }
 
 bool BaseRestTreeModel::doInsertItems(QVariantList values) {	
-	//prepare vars
-	int insertFrom  = rowCount();
-	int insertCount = rowCount()+values.count()-1;
-
-	//check if we need to full reload
-	if (this->loadingStatus() == LoadingStatus::FullReloadProcessing) {
-		reset();
-		insertFrom  = rowCount();
-		insertCount = values.count()-1;
-	}
-
-	//check for assertion or empty data
-	if (insertCount < insertFrom) { insertCount = insertFrom; }
-
-	if (insertCount == 0) {
-		return false;
-	}
-
-	//append rows to model
-	QModelIndex idx = this->index(rowCount(), 0);
-	beginInsertRows(idx, insertFrom, insertCount);
-
 	//rootItem->addRecursiveData(values, this->idField(), this->childrenField());
-	this->addRecursiveData(rootItem, values, this->idField(), this->childrenField(), idx);
+	this->addRecursiveData(rootItem, values, this->idField(), this->childrenField(), this->index(rowCount(), 0));
 
 	return true;
 }
@@ -168,6 +146,16 @@ void BaseRestTreeModel::modelEndInsertRows()
 	return curNode;
 }*/
 
+QVariantMap BaseRestTreeModel::get( const QModelIndex &index ) const {
+	if (!index.isValid()) {
+		qDebug("!index.isValid()");
+		return QVariantMap();
+	}
+
+	//RestTreeItem *treeItem = this->findTreeItemByIndex(index);
+	return static_cast<RestTreeItem*>(index.internalPointer())->object();
+}
+
 QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid()) {
@@ -175,14 +163,12 @@ QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	//RestTreeItem *treeItem = this->findTreeItemByIndex(index);
-	RestTreeItem *treeItem = static_cast<RestTreeItem*>(index.internalPointer());
-	return treeItem->value(this->getRoleName(role));
+	return static_cast<RestTreeItem*>(index.internalPointer())->value(this->getRoleName(role));
 }
 
 int BaseRestTreeModel::count() const
 {
-	qFatal("not implemented, yet");
+	qFatal("not implemented, yet #0");
 	return 0;
 }
 
@@ -216,7 +202,7 @@ const QModelIndex BaseRestTreeModel::createIndexByItem(RestTreeItem *item) const
 	RestTreeItem *parent = item->parentItem();
 
 	if (parent == NULL) {
-		qDebug() << "BaseRestTreeModel::createIndexByItem(): parent == NULL";
+		//RqDebug() << "BaseRestTreeModel::createIndexByItem(): parent == NULL";
 		return QModelIndex();
 	}
 
@@ -247,7 +233,7 @@ const QModelIndex BaseRestTreeModel::findIndexById(QString id)
 void BaseRestTreeModel::updateItem(QVariantMap value)
 {
 	Q_UNUSED(value)
-	qFatal("not implemented, yet");
+	qFatal("not implemented, yet #1");
 }
 
 QList<QModelIndex> BaseRestTreeModel::getTreeItemPath(QModelIndex idx) const
@@ -287,16 +273,6 @@ const QList<RestTreeItem *> BaseRestTreeModel::tree() const
 const QList<QObject *> BaseRestTreeModel::treeAsQObjects() const
 {
 	return this->rootItem->childItemsAsQObject();
-}
-
-QVariantMap BaseRestTreeModel::get( QModelIndex idx ) const {
-	QVariantMap map;
-	QHash<int, QByteArray> roleNames = this->roleNames();
-	foreach(int k, roleNames.keys()) {
-		map[roleNames.value(k)] = data(idx, k);
-	}
-	//qDebug() << "get() -> " << map;
-	return map;
 }
 
 QVariantList BaseRestTreeModel::getChildrenIndexes(QModelIndex index) const

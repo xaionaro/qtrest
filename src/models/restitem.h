@@ -7,6 +7,7 @@ class RestItem {
 	public:
 		explicit RestItem(QVariantMap object = QVariantMap(), QString idField = "");
 		QVariant value(QString key) const;
+		QVariantMap object() const;
 		QStringList keys() const;
 		QString id() const;
 		bool isUpdated() const;

@@ -22,6 +22,7 @@ class BaseRestListModel : public BaseRestItemModel
 		void updateItem(QVariantMap value);
 		void append(const RestItem &item);
 		void reset();
+		const RestItem &at(int row) const;
 		//void modelEndInsertRows();
 
 	public:
@@ -34,6 +35,8 @@ class BaseRestListModel : public BaseRestItemModel
 		int count() const;
 		RestItem *firstRestItem();
 		Pagination *pagination();
+
+		Q_INVOKABLE QVariantMap get(const QModelIndex &index ) const;
 
 	public slots:
 		bool canFetchMore(const QModelIndex &parent) const;

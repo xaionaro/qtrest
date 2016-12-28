@@ -19,6 +19,11 @@ QStringList RestItem::keys() const {
     return m_object.keys();
 }
 
+QVariantMap RestItem::object() const {
+	//qDebug() << this << m_object;
+	return m_object;
+}
+
 QString RestItem::id() const {
     return m_object.value(m_idField).toString();
 }

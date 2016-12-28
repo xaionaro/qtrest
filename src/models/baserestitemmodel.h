@@ -64,7 +64,7 @@ public:
     QString loadingErrorString() const;
     QNetworkReply::NetworkError loadingErrorCode() const;
     QStringList fields() const;
-    QString idField() const;
+	QString idField() const;
     int idFieldRole() const;
     QString fetchDetailLastId() const;
     DetailsModel *detailsModel();
@@ -108,6 +108,8 @@ public slots:
 
     void setApiInstance(APIBase *apiInstance);
 
+	void setAllValues(QVariantList values, bool fullReloadProcessing);
+
 	bool isValidIndex(QModelIndex index) const;
 	virtual bool isHiddenIndex(QModelIndex index) const;
 	virtual bool isClickableIndex(QModelIndex index) const;
@@ -119,7 +121,7 @@ protected:
     //reimplement this for call specific API method GET details of record by ID
     virtual QNetworkReply *fetchDetailImpl(QString id) = 0;
     //reimplenet this for prepropcessing each item before add it to model
-    virtual QVariantMap preProcessItem(QVariantMap item) = 0;
+	virtual QVariantMap preProcessItem(QVariantMap item);
     //for parse list, reimplemented in JSON and XML models
     virtual QVariantList getVariantList(QByteArray bytes) = 0;
     //for parse details for one element, reimplemented in JSON and XML models
