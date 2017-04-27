@@ -46,6 +46,12 @@ void RestItem::update(QVariantMap value) {
     m_isUpdated = true;
 }
 
+void RestItem::setFieldValue(QString fieldName, QVariant value) {
+	this->m_object[fieldName] = value;
+
+	return;
+}
+
 bool RestItem::operator==(const RestItem &other) {
     return id() == other.id();
 }

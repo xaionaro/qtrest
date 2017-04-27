@@ -45,6 +45,9 @@ class RestTreeItem : public QObject, public RestItem
 		Q_PROPERTY(bool hasChild READ hasChild NOTIFY hasChildChanged)
 		bool hasChild() const;
 
+		bool callRecursive (bool(*foreachFunc)(RestTreeItem *item, void *arg) , void *arg);
+
+
 	signals:
 		void contentChanged();
 		void childItemsChanged();

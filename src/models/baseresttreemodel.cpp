@@ -427,3 +427,7 @@ bool BaseRestTreeModel::isClickableIndex(QModelIndex index) const
 	//qDebug() << "BaseRestTreeModel::isClickableIndex(" << index << "): " << isClickable;
 	return isClickable;
 }
+
+bool BaseRestTreeModel::callRecursive(bool(*foreachFunc)(RestTreeItem *, void *), void *arg ) {
+	return this->rootItem->callRecursive(foreachFunc, arg);
+}

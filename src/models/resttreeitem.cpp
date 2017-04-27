@@ -200,3 +200,19 @@ void RestTreeItem::hide() {
 void RestTreeItem::show() {
 	this->setIsHiddenToRoot(false);
 }
+
+bool RestTreeItem::callRecursive(bool(*foreachFunc)(RestTreeItem *, void *), void *arg ) {
+	if (!foreachFunc(this, arg)) {
+		return false;
+	}
+
+	QMutableListIterator<RestTreeItem*> iter( this->m_childItems );
+	while ( iter.hasNext() ) {
+			RestTreeItem *item = iter.next();
+			if (!item->callRecursive(foreachFunc, arg)) {
+				return false;
+			}
+	}
+
+	return true;
+}

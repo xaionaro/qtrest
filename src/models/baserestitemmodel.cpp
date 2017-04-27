@@ -73,17 +73,17 @@ void BaseRestItemModel::setAllValues(QVariantList values, bool fullReloadProcess
 
 	//check if we need to full reload
 	if (fullReloadProcessing) {
-		qDebug("this->loadingStatus() == LoadingStatus::FullReloadProcessing");
+		//qDebug("this->loadingStatus() == LoadingStatus::FullReloadProcessing");
 		reset();
 		insertFrom  = rowCount();
-		insertCount = values.count()-1;
+		insertCount = values.count();
 	}
 
 	//check for assertion or empty data
 	if (insertCount < insertFrom) { insertCount = insertFrom; }
 
 	if (insertCount == 0) {
-		qDebug() << "Nothing to insert! Please check your parser!" << count() << loadingStatus();
+		qDebug() << "Nothing to insert! Please check your parser!" << count() << rowCount() << values.count() << loadingStatus();
 		hasError = true;
 	}
 
@@ -103,6 +103,7 @@ void BaseRestItemModel::setAllValues(QVariantList values, bool fullReloadProcess
 		RestItem *item = this->firstRestItem();
 		generateRoleNames(*item);
 
+		this->preModelEndInsertRows();
 		this->modelEndInsertRows();
 	}
 
@@ -277,6 +278,10 @@ QHash<int, QByteArray> BaseRestItemModel::detailsRoleNames() const
 void BaseRestItemModel::updateHeadersData(QNetworkReply *reply)
 {
 	Q_UNUSED(reply)
+}
+
+void BaseRestItemModel::preModelEndInsertRows()
+{
 }
 
 void BaseRestItemModel::generateDetailsRoleNames(QVariantMap item)

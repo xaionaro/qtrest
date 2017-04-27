@@ -13,6 +13,7 @@ class RestItem {
 		bool isUpdated() const;
 		bool isValid() const;
 
+		void setFieldValue(QString fieldName, QVariant value);
 		void update (QVariantMap value);
 
 		bool operator==(const RestItem &other);

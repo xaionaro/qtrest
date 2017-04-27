@@ -108,7 +108,7 @@ public slots:
 
     void setApiInstance(APIBase *apiInstance);
 
-	void setAllValues(QVariantList values, bool fullReloadProcessing);
+	Q_INVOKABLE void setAllValues(QVariantList values, bool fullReloadProcessing);
 
 	bool isValidIndex(QModelIndex index) const;
 	virtual bool isHiddenIndex(QModelIndex index) const;
@@ -151,6 +151,7 @@ protected:
 	virtual bool doInsertItems(QVariantList values) = 0;
 	QString getRoleName(int roleId) const;
 
+	virtual void preModelEndInsertRows();
 	virtual void modelEndInsertRows();
 
 

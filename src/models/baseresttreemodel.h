@@ -106,6 +106,8 @@ class BaseRestTreeModel : public BaseRestItemModel
 		Q_INVOKABLE QModelIndex getRootIndex() const;
 		Q_INVOKABLE QModelIndex getParentIndex(QModelIndex childIndex) const;
 
+		bool callRecursive (bool(*foreachFunc)(RestTreeItem *item, void *arg) , void *arg);
+
 	signals:
 		void childrenFieldChanged(QString childrenField);
 		void treeChanged();

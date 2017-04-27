@@ -37,6 +37,7 @@ class BaseRestListModel : public BaseRestItemModel
 		Pagination *pagination();
 
 		Q_INVOKABLE QVariantMap get(const QModelIndex &index ) const;
+		Q_INVOKABLE void setFieldValue(QString fieldName, QVariant newValue);
 
 	public slots:
 		bool canFetchMore(const QModelIndex &parent) const;

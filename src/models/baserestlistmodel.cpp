@@ -78,6 +78,15 @@ bool BaseRestListModel::doInsertItems(QVariantList values) {
 	return true;
 }
 
+void BaseRestListModel::setFieldValue(QString fieldName, QVariant newValue) {
+	QMutableListIterator<RestItem> iter( this->m_items );
+	while ( iter.hasNext() ) {
+			RestItem &item = iter.next();
+			item.setFieldValue(fieldName, newValue);
+	}
+
+	return;
+}
 bool BaseRestListModel::canFetchMore(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent)
