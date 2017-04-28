@@ -46,6 +46,9 @@ class RestTreeItem : public QObject, public RestItem
 		bool hasChild() const;
 
 		bool callRecursive (bool(*foreachFunc)(RestTreeItem *item, void *arg) , void *arg);
+		bool callRecursive (bool(*foreachFunc)(RestItem item, void *arg) , void *arg) const;
+
+		int count() const;
 
 
 	signals:

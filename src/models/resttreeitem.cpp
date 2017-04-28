@@ -216,3 +216,37 @@ bool RestTreeItem::callRecursive(bool(*foreachFunc)(RestTreeItem *, void *), voi
 
 	return true;
 }
+
+bool RestTreeItem::callRecursive(bool(*foreachFunc)(const RestItem, void *), void *arg ) const {
+	RestItem item = *static_cast<const RestItem *>(this);
+	if (!foreachFunc(item, arg)) {
+		return false;
+	}
+
+	QListIterator<RestTreeItem*> iter( this->m_childItems );
+	while ( iter.hasNext() ) {
+			RestTreeItem *item = iter.next();
+			if (!item->callRecursive(foreachFunc, arg)) {
+				return false;
+			}
+	}
+
+	return true;
+}
+
+
+bool count_callbackF(const RestItem item, void *arg) {
+	Q_UNUSED(item)
+
+	int *count_p = (int *)arg;
+	(*count_p)++;
+
+	return true;
+}
+
+int RestTreeItem::count() const {
+	int count = 0;
+	this->callRecursive(count_callbackF, &count);
+	return count;
+}
+

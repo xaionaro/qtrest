@@ -168,8 +168,7 @@ QVariant BaseRestTreeModel::data(const QModelIndex &index, int role) const
 
 int BaseRestTreeModel::count() const
 {
-	qFatal("not implemented, yet #0");
-	return 0;
+	return this->rootItem->count();
 }
 
 RestItem *BaseRestTreeModel::firstRestItem() {
