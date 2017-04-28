@@ -69,7 +69,7 @@ void BaseRestItemModel::setAllValues(QVariantList values, bool fullReloadProcess
 
 	//prepare vars
 	int insertFrom  = rowCount();
-	int insertCount = rowCount()+values.count()-1;
+	int insertCount = rowCount()+values.count();
 
 	//check if we need to full reload
 	if (fullReloadProcessing) {
@@ -89,7 +89,7 @@ void BaseRestItemModel::setAllValues(QVariantList values, bool fullReloadProcess
 
 	if (!hasError) {
 		//append rows to model
-		beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount);
+		beginInsertRows(this->index(rowCount(), 0), insertFrom, insertCount-1);
 
 		if ( !this->doInsertItems(values) ) {
 			qDebug() << "Error from this->doInsertItems()";
