@@ -250,3 +250,10 @@ int RestTreeItem::count() const {
 	return count;
 }
 
+void RestTreeItem::reset() {
+	qDeleteAll(this->m_childItems);
+	this->m_childItems.clear();
+
+	return;
+}
+

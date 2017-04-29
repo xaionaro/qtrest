@@ -108,6 +108,8 @@ class BaseRestTreeModel : public BaseRestItemModel
 
 		bool callRecursive (bool(*foreachFunc)(RestTreeItem *item, void *arg) , void *arg);
 
+		Q_INVOKABLE void reset();
+
 	signals:
 		void childrenFieldChanged(QString childrenField);
 		void treeChanged();
@@ -129,7 +131,6 @@ class BaseRestTreeModel : public BaseRestItemModel
 
 	protected:
 		virtual bool doInsertItems(QVariantList values);
-		void reset();
 		void updateItem(QVariantMap value);
 		void modelEndInsertRows() Q_DECL_OVERRIDE;
 		void addRecursiveData(RestTreeItem *curItem, const QVariantList &values, QString idFieldName, QString childrenFieldName, QModelIndex idx);

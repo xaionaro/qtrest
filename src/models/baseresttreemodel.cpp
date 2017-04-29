@@ -182,7 +182,7 @@ RestItem *BaseRestTreeModel::firstRestItem() {
 void BaseRestTreeModel::reset()
 {
 	this->beginResetModel();
-	qDeleteAll(this->rootItem->childItems());
+	this->rootItem->reset();
 	this->endResetModel();
 }
 

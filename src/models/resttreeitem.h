@@ -24,6 +24,8 @@ class RestTreeItem : public QObject, public RestItem
 
 		void appendChild(RestTreeItem *child);
 
+		void reset();
+
 		RestTreeItem *child(int row);
 		//QList<RestTreeItem*> children();
 		QVariant data(int column) const;
